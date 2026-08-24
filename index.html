@@ -3,11 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flashemail v3 - Smart & Cloud</title>
+<title>Flashemail v3.2 — Custom Groups & Auth</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Google Identity Services -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --black: #0a0a0c;
@@ -59,7 +57,7 @@
   }
   
   .user-profile { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
-  .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--line); display:flex; align-items:center; justify-content:center;}
+  .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--red-dim); color:var(--white); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold;}
 
   main{ max-width:1180px; margin:0 auto; padding:48px 5vw 100px; }
 
@@ -76,15 +74,6 @@
   }
   h1 .accent{ color:var(--red); }
   .hero p{ margin-top:16px; color:var(--gray); font-size:16px; max-width:560px; }
-
-  .flow{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
-    background:var(--line); border:1px solid var(--line);
-    margin:36px 0 48px; border-radius:14px; overflow:hidden;
-  }
-  .flow-step{ background:var(--black-2); padding:16px 18px; font-family:'JetBrains Mono', monospace; }
-  .flow-step b{ display:block; color:var(--red); font-size:11px; letter-spacing:.08em; margin-bottom:6px;}
-  .flow-step span{ font-family:'Space Grotesk', sans-serif; font-size:13px; color:var(--white); }
 
   .grid{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:22px; }
   @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
@@ -110,7 +99,7 @@
   }
 
   .input-row{ display:flex; gap:8px; margin-bottom:10px; }
-  input[type=text], input[type=email], input[type=number], textarea, select{
+  input[type=text], input[type=email], input[type=password], input[type=number], textarea, select{
     width:100%; background:var(--black); border:1px solid var(--line);
     color:var(--white); border-radius:10px; padding:12px 14px;
     font-family:'Space Grotesk', sans-serif; font-size:14px;
@@ -136,8 +125,8 @@
   .btn-sm{ padding:7px 12px; font-size:12px; border-radius:8px; }
 
   .intelligence-box{ background: rgba(59, 130, 246, 0.05); border: 1px solid var(--blue-dim); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
-  .intel-header{ display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--blue); margin-bottom: 12px; }
-  .intel-actions{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom:12px; }
+  .intel-header{ display: flex; align-items: center; justify-content:space-between; font-size: 13px; font-weight: 600; color: var(--blue); margin-bottom: 12px; }
+  .intel-actions{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom:12px; max-height: 100px; overflow-y: auto; }
   .btn-intel{ background: transparent; border: 1px solid var(--line); color: var(--gray); font-size: 11px; padding: 6px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; }
   .btn-intel:hover, .btn-intel.active{ border-color: var(--blue); color: var(--blue); background:rgba(59,130,246,0.1); }
 
@@ -151,7 +140,7 @@
   .bulk-area{ display:none; margin-bottom:12px; }
   .bulk-area.show{ display:block; }
 
-  .chip-list{ display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto; margin-top:4px; padding-right:4px; }
+  .chip-list{ display:flex; flex-direction:column; gap:8px; max-height:380px; overflow-y:auto; margin-top:4px; padding-right:4px; }
   .chip{
     display:flex; align-items:center; gap:10px; background:var(--black); border:1px solid var(--line);
     border-radius:10px; padding:10px 12px; transition: border-color 0.2s, background 0.2s;
@@ -197,23 +186,23 @@
   .mass-send-box.show { display:block; }
 
   .overlay{
-    position:fixed; inset:0; background:rgba(6,6,7,.85); backdrop-filter:blur(6px);
+    position:fixed; inset:0; background:rgba(6,6,7,.90); backdrop-filter:blur(6px);
     display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
   }
   .overlay.show{ display:flex; }
   .modal{
-    width:100%; max-width:460px; background:var(--black-2); border:1px solid var(--line);
+    width:100%; max-width:420px; background:var(--black-2); border:1px solid var(--line);
     border-radius:18px; padding:28px; position:relative;
     box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,30,45,.08);
     animation:pop .18s ease;
   }
   @keyframes pop{ from{ transform:scale(.92); opacity:0;} to{ transform:scale(1); opacity:1;} }
   .modal h3{ font-family:'Archivo Black', sans-serif; font-size:19px; margin-bottom:10px;}
-  .modal p{ color:var(--gray); font-size:13.5px; line-height:1.6; margin-bottom:8px; }
+  .modal p{ color:var(--gray); font-size:13.5px; line-height:1.6; margin-bottom:16px; }
   
-  .login-box { text-align:center; padding: 40px 20px; }
-  .login-box h2 { font-family:'Archivo Black'; font-size:24px; margin-bottom:10px; }
-  .login-box p { color:var(--gray); margin-bottom:24px; font-size:14px;}
+  .login-box { text-align:center; }
+  .login-box h2 { font-family:'Archivo Black'; font-size:22px; margin-bottom:6px; }
+  .login-box p { color:var(--gray); margin-bottom:20px; font-size:13px;}
 
   footer{ text-align:center; padding:30px 5vw 50px; color:var(--gray); font-family:'JetBrains Mono', monospace; font-size:11px; border-top:1px solid var(--line); }
   .toast{
@@ -227,20 +216,26 @@
 </head>
 <body>
 
-<!-- TELA DE LOGIN OVERLAY -->
+<!-- TELA DE LOGIN / CADASTRO -->
 <div class="overlay show" id="loginOverlay" style="z-index: 999;">
   <div class="modal login-box">
-    <div class="brand-mark" style="margin: 0 auto 16px; width:50px; height:50px;">
+    <div class="brand-mark" style="margin: 0 auto 14px; width:44px; height:44px;">
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 L4 14 H11 L10 22 L20 9 H12.5 L13 2Z" fill="#ff1e2d"/></svg>
     </div>
-    <h2>Acesse o Flashemail</h2>
-    <p>Faça login com sua conta Google para sincronizar e armazenar seus dados, contatos e templates de grupo.</p>
+    <h2>Acesso ao Flashemail</h2>
+    <p>Insira seu e-mail e crie uma senha para gerenciar seus grupos.</p>
     
-    <!-- Botão Real do Google (Requer Client_ID) -->
-    <div id="googleButtonContainer" style="display:flex; justify-content:center; margin-bottom: 16px;"></div>
-    
-    <!-- Botão de Teste (Fallback para uso local sem servidor) -->
-    <button class="btn btn-ghost btn-block" onclick="mockLogin()">Modo Local / Teste (Sem Cloud)</button>
+    <div style="text-align:left; margin-bottom:12px;">
+      <label class="field-label">Seu E-mail de Acesso</label>
+      <input type="email" id="authEmail" placeholder="seuemail@empresa.com">
+    </div>
+
+    <div style="text-align:left; margin-bottom:20px;">
+      <label class="field-label">Sua Senha</label>
+      <input type="password" id="authPassword" placeholder="••••••••">
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="handleAuth()">Entrar / Criar Conta</button>
   </div>
 </div>
 
@@ -250,7 +245,7 @@
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 L4 14 H11 L10 22 L20 9 H12.5 L13 2Z" fill="#ff1e2d"/></svg>
     </div>
     <div class="brand-name">flash<span>email</span></div>
-    <div class="brand-tag">v3.0 · groups & cloud</div>
+    <div class="brand-tag">v3.2 · custom groups</div>
   </div>
   <div class="user-profile" id="userProfile" style="display:none;">
     <span id="userNameDisplay">Usuário</span>
@@ -261,9 +256,9 @@
 
 <main>
   <section class="hero">
-    <div class="eyebrow">disparo inteligente em lote</div>
-    <h1>Monte a lista. Filtre por Grupo.<br>Dispare no <span class="accent">Outlook</span>.</h1>
-    <p>Organize em Offshore, Onshore, Porto, salve templates únicos por grupo e dispare em abas separadas.</p>
+    <div class="eyebrow">gerenciamento personalizado</div>
+    <h1>Crie seus próprios grupos.<br>Filtre e dispare no <span class="accent">Outlook</span>.</h1>
+    <p>Organize listas customizadas, salve templates específicos para cada grupo criado e dispare em abas separadas.</p>
   </section>
 
   <div class="grid">
@@ -273,15 +268,20 @@
         <div class="panel-count" id="countBadge">0 cadastrados</div>
       </div>
 
+      <!-- PAINEL DE CRIAÇÃO DE GRUPOS CUSTOMIZADOS -->
       <div class="intelligence-box">
-        <div class="intel-header">Filtros de Grupo</div>
-        <div class="intel-actions" id="groupFilters">
-          <button class="btn-intel active" onclick="filterByGroup('todos')">Todos</button>
-          <button class="btn-intel" onclick="filterByGroup('offshore')">Offshore</button>
-          <button class="btn-intel" onclick="filterByGroup('onshore')">Onshore</button>
-          <button class="btn-intel" onclick="filterByGroup('porto')">Porto</button>
-          <button class="btn-intel" onclick="filterByGroup('outros')">Outros</button>
+        <div class="intel-header">
+          <span>Criar Novo Grupo</span>
         </div>
+        <div class="input-row" style="margin-bottom:0;">
+          <input type="text" id="newGroupNameInput" placeholder="Ex: Diretoria, Parcerias...">
+          <button class="btn btn-primary btn-sm" onclick="createNewGroup()">+ Criar</button>
+        </div>
+      </div>
+
+      <label class="field-label">Filtrar por Grupo:</label>
+      <div class="intel-actions" id="groupFilters">
+        <!-- Renderizado Dinamicamente -->
       </div>
 
       <div class="toggle-row">
@@ -289,24 +289,20 @@
         <button id="tabBulk" onclick="setAddMode('bulk')">Colar vários</button>
       </div>
 
-      <!-- Seletor de Grupo Global para Adição -->
-      <label class="field-label">Classificar no Grupo:</label>
+      <label class="field-label">Salvar no Grupo:</label>
       <select id="addGroupSelect">
-        <option value="offshore">Offshore</option>
-        <option value="onshore">Onshore</option>
-        <option value="porto">Porto</option>
-        <option value="outros">Outros</option>
+        <!-- Renderizado Dinamicamente -->
       </select>
 
-      <div id="singleAdd">
-        <label class="field-label">Endereço de e-mail</label>
+      <div id="singleAdd" style="margin-top:10px;">
+        <label class="field-label">Endereço de e-mail do contato</label>
         <div class="input-row">
-          <input type="email" id="singleEmailInput" placeholder="nome@empresa.com">
+          <input type="email" id="singleEmailInput" placeholder="contato@empresa.com">
           <button class="btn btn-primary" onclick="addSingleEmail()">+ Add</button>
         </div>
       </div>
 
-      <div id="bulkAdd" class="bulk-area">
+      <div id="bulkAdd" class="bulk-area" style="margin-top:10px;">
         <label class="field-label">Cole vários e-mails (vírgula, ; ou linha a linha)</label>
         <textarea id="bulkEmailInput" placeholder="ana@empresa.com, joao@empresa.com"></textarea>
         <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="addBulkEmails()">+ Adicionar lista</button>
@@ -330,13 +326,10 @@
 
       <label class="field-label" style="color:var(--blue);">Carregar Template do Grupo:</label>
       <select id="composerGroupSelect" onchange="loadGroupTemplate()">
-        <option value="offshore">Offshore</option>
-        <option value="onshore">Onshore</option>
-        <option value="porto">Porto</option>
-        <option value="outros">Outros</option>
+        <!-- Renderizado Dinamicamente -->
       </select>
 
-      <label class="field-label">Assunto</label>
+      <label class="field-label" style="margin-top:10px;">Assunto</label>
       <div class="input-row">
         <input type="text" id="subjectInput" placeholder="Ex: Atualização importante" oninput="saveGroupTemplate()">
       </div>
@@ -371,49 +364,50 @@
 </main>
 
 <footer>
-  <b>Flashemail</b> — Estrutura adaptada para grupos, envio "Para:" e abas independentes.
+  <b>Flashemail</b> — Grupos personalizados, autenticação local e abas individuais.
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  /* ====== GOOGLE AUTH & DATA STORAGE ====== */
+  /* ====== AUTHENTICATION ====== */
   let currentUser = null;
-  
-  window.onload = function () {
-    // Configuração do Google Identity (Necessário inserir o client_id do Google Cloud)
-    google.accounts.id.initialize({
-      client_id: "SEU_CLIENT_ID_AQUI.apps.googleusercontent.com", 
-      callback: handleCredentialResponse
-    });
-    google.accounts.id.renderButton(
-      document.getElementById("googleButtonContainer"),
-      { theme: "outline", size: "large", type: "standard" }
-    );
-  };
 
-  function handleCredentialResponse(response) {
-    // Em um app real, o token seria validado e salvo. Aqui vamos simular o login extraindo os dados (Mock simplificado do JWT)
-    const base64Url = response.credential.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    const payload = JSON.parse(jsonPayload);
-    
-    loginSuccess(payload.email, payload.name, payload.picture);
+  function handleAuth() {
+    const emailInput = document.getElementById('authEmail').value.trim().toLowerCase();
+    const passwordInput = document.getElementById('authPassword').value;
+
+    if(!emailInput || !isValidEmail(emailInput)){
+      showToast('Insira um e-mail válido para acesso.');
+      return;
+    }
+    if(!passwordInput || passwordInput.length < 3){
+      showToast('A senha precisa ter pelo menos 3 caracteres.');
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem('flashemail_db_users') || '{}');
+
+    if(users[emailInput]) {
+      if(users[emailInput] !== passwordInput) {
+        showToast('Senha incorreta para este e-mail.');
+        return;
+      }
+    } else {
+      users[emailInput] = passwordInput;
+      localStorage.setItem('flashemail_db_users', JSON.stringify(users));
+      showToast('Conta criada com sucesso!');
+    }
+
+    loginSuccess(emailInput);
   }
 
-  function mockLogin() {
-    loginSuccess('teste@local.com', 'Usuário Teste', '');
-  }
-
-  function loginSuccess(email, name, picture) {
+  function loginSuccess(email) {
     currentUser = email;
     document.getElementById('loginOverlay').classList.remove('show');
     document.getElementById('userProfile').style.display = 'flex';
-    document.getElementById('userNameDisplay').textContent = name;
-    document.getElementById('userAvatarDisplay').innerHTML = picture ? `<img src="${picture}" width="28" style="border-radius:50%">` : name.charAt(0);
+    document.getElementById('userNameDisplay').textContent = email;
+    document.getElementById('userAvatarDisplay').textContent = email.charAt(0).toUpperCase();
     
     loadData();
     restoreLastInfo();
@@ -423,46 +417,50 @@
     currentUser = null;
     document.getElementById('loginOverlay').classList.add('show');
     document.getElementById('userProfile').style.display = 'none';
+    document.getElementById('authPassword').value = '';
     contacts = [];
-    renderContacts();
+    groups = ['Geral'];
+    renderAll();
   }
 
   /* ====== APP LOGIC ====== */
   let contacts = [];
+  let groups = ['Geral'];
   let currentGroupFilter = 'todos';
   let addMode = 'single';
   let sendMode = 'desktop';
-  
-  // Templates armazenados por grupo
-  let templates = {
-    offshore: { subject: '', body: '' },
-    onshore: { subject: '', body: '' },
-    porto: { subject: '', body: '' },
-    outros: { subject: '', body: '' }
-  };
-
-  // Informações da última utilização
-  let lastInfo = { email: '', group: 'offshore' };
+  let templates = {};
+  let lastInfo = { email: '', group: 'Geral' };
 
   function loadData() {
     if(!currentUser) return;
-    const keyPrefix = `flashemail_v3_${currentUser}`;
+    const keyPrefix = `flashemail_v32_${currentUser}`;
     
-    // Load Contacts
+    const savedGroups = localStorage.getItem(`${keyPrefix}_groups`);
+    if(savedGroups) {
+      groups = JSON.parse(savedGroups);
+    } else {
+      groups = ['Geral', 'Offshore', 'Onshore', 'Porto'];
+    }
+
     const savedContacts = localStorage.getItem(`${keyPrefix}_contacts`);
     if(savedContacts) contacts = JSON.parse(savedContacts);
     
-    // Load Templates
     const savedTemplates = localStorage.getItem(`${keyPrefix}_templates`);
-    if(savedTemplates) templates = JSON.parse(savedTemplates);
-    
-    renderContacts();
-    loadGroupTemplate();
+    if(savedTemplates) {
+      templates = JSON.parse(savedTemplates);
+    } else {
+      templates = {};
+      groups.forEach(g => templates[g] = { subject: '', body: '' });
+    }
+
+    renderAll();
   }
 
   function saveData() {
     if(!currentUser) return;
-    const keyPrefix = `flashemail_v3_${currentUser}`;
+    const keyPrefix = `flashemail_v32_${currentUser}`;
+    localStorage.setItem(`${keyPrefix}_groups`, JSON.stringify(groups));
     localStorage.setItem(`${keyPrefix}_contacts`, JSON.stringify(contacts));
     localStorage.setItem(`${keyPrefix}_templates`, JSON.stringify(templates));
     localStorage.setItem(`${keyPrefix}_lastInfo`, JSON.stringify(lastInfo));
@@ -470,13 +468,15 @@
 
   function restoreLastInfo() {
     if(!currentUser) return;
-    const savedLast = localStorage.getItem(`flashemail_v3_${currentUser}_lastInfo`);
+    const savedLast = localStorage.getItem(`flashemail_v32_${currentUser}_lastInfo`);
     if(savedLast) {
       lastInfo = JSON.parse(savedLast);
-      document.getElementById('singleEmailInput').value = lastInfo.email || '';
-      document.getElementById('addGroupSelect').value = lastInfo.group || 'offshore';
-      document.getElementById('composerGroupSelect').value = lastInfo.group || 'offshore';
-      loadGroupTemplate();
+      if(groups.includes(lastInfo.group)) {
+        document.getElementById('singleEmailInput').value = lastInfo.email || '';
+        document.getElementById('addGroupSelect').value = lastInfo.group;
+        document.getElementById('composerGroupSelect').value = lastInfo.group;
+        loadGroupTemplate();
+      }
     }
   }
 
@@ -489,6 +489,65 @@
 
   function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
 
+  function createNewGroup() {
+    const input = document.getElementById('newGroupNameInput');
+    let groupName = input.value.trim();
+    
+    if(!groupName) {
+      showToast('Digite um nome para o grupo.');
+      return;
+    }
+
+    // Normaliza capitalização ou evita duplicados exatos
+    if(groups.map(g=>g.toLowerCase()).includes(groupName.toLowerCase())) {
+      showToast('Este grupo já existe.');
+      return;
+    }
+
+    groups.push(groupName);
+    if(!templates[groupName]) {
+      templates[groupName] = { subject: '', body: '' };
+    }
+
+    input.value = '';
+    saveData();
+    renderAll();
+    showToast(`Grupo "${groupName}" criado com sucesso!`);
+  }
+
+  function renderAll() {
+    renderGroupFilters();
+    renderGroupSelects();
+    renderContacts();
+    loadGroupTemplate();
+  }
+
+  function renderGroupFilters() {
+    const container = document.getElementById('groupFilters');
+    let html = `<button class="btn-intel ${currentGroupFilter === 'todos' ? 'active':''}" onclick="filterByGroup('todos')">Todos</button>`;
+    
+    groups.forEach(g => {
+      html += `<button class="btn-intel ${currentGroupFilter === g ? 'active':''}" onclick="filterByGroup('${g}')">${g}</button>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function renderGroupSelects() {
+    const addSelect = document.getElementById('addGroupSelect');
+    const composerSelect = document.getElementById('composerGroupSelect');
+    
+    let html = groups.map(g => `<option value="${g}">${g}</option>`).join('');
+    
+    const currentAddVal = addSelect.value;
+    const currentCompVal = composerSelect.value;
+
+    addSelect.innerHTML = html;
+    composerSelect.innerHTML = html;
+
+    if(groups.includes(currentAddVal)) addSelect.value = currentAddVal;
+    if(groups.includes(currentCompVal)) composerSelect.value = currentCompVal;
+  }
+
   function setAddMode(mode){
     addMode = mode;
     document.getElementById('tabSingle').classList.toggle('active', mode==='single');
@@ -499,10 +558,8 @@
 
   function filterByGroup(group) {
     currentGroupFilter = group;
-    document.querySelectorAll('#groupFilters button').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    renderGroupFilters();
     
-    // Auto-select template group when filtering
     if (group !== 'todos') {
       document.getElementById('composerGroupSelect').value = group;
       loadGroupTemplate();
@@ -510,15 +567,19 @@
     renderContacts();
   }
 
-  /* ====== TEMPLATES LOGIC ====== */
   function loadGroupTemplate() {
     const group = document.getElementById('composerGroupSelect').value;
-    document.getElementById('subjectInput').value = templates[group]?.subject || '';
-    document.getElementById('bodyInput').value = templates[group]?.body || '';
+    if(!templates[group]) {
+      templates[group] = { subject: '', body: '' };
+    }
+    document.getElementById('subjectInput').value = templates[group].subject || '';
+    document.getElementById('bodyInput').value = templates[group].body || '';
   }
 
   function saveGroupTemplate() {
     const group = document.getElementById('composerGroupSelect').value;
+    if(!templates[group]) templates[group] = { subject: '', body: '' };
+    
     templates[group] = {
       subject: document.getElementById('subjectInput').value,
       body: document.getElementById('bodyInput').value
@@ -526,7 +587,6 @@
     saveData();
   }
 
-  /* ====== CONTACTS LOGIC ====== */
   function addSingleEmail(){
     const input = document.getElementById('singleEmailInput');
     const group = document.getElementById('addGroupSelect').value;
@@ -539,8 +599,13 @@
       lastInfo.group = group;
       saveData();
     }
+    input.value = '';
     input.focus();
   }
+
+  document.getElementById('singleEmailInput').addEventListener('keydown', e=>{
+    if(e.key === 'Enter'){ e.preventDefault(); addSingleEmail(); }
+  });
 
   function addBulkEmails(){
     const raw = document.getElementById('bulkEmailInput').value;
@@ -558,6 +623,8 @@
       renderContacts();
       document.getElementById('bulkEmailInput').value = '';
       showToast(`${added} e-mail(s) adicionados ao grupo ${group}`);
+    } else {
+      showToast('Nenhum e-mail válido encontrado.');
     }
   }
 
@@ -565,19 +632,19 @@
     email = email.toLowerCase();
     const existing = contacts.find(c => c.email === email);
     if(existing){
-      existing.group = group; // Atualiza o grupo se já existir
-      if(triggerRender) { showToast('E-mail atualizado para o grupo selecionado.'); renderContacts(); }
+      existing.group = group;
+      if(triggerRender) { showToast('E-mail já existia. Grupo atualizado.'); renderContacts(); saveData(); }
       return false;
     }
     contacts.unshift({ email, group, selected: true, sendCount: 0 });
-    if(triggerRender) renderContacts();
+    if(triggerRender) { saveData(); renderContacts(); }
     return true;
   }
 
   function toggleContact(email){
     const c = contacts.find(c=>c.email===email);
     if(c) c.selected = !c.selected;
-    renderContacts(); // Para atualizar o badge de massa
+    renderContacts();
   }
 
   function selectAll(state){
@@ -607,7 +674,6 @@
     const selectedCount = contacts.filter(c=>c.selected).length;
     document.getElementById('selectedBadge').textContent = selectedCount + ' selecionados';
 
-    // Mostra opção de envio em massa apenas se 1 contato estiver selecionado
     document.getElementById('massSendBox').classList.toggle('show', selectedCount === 1);
 
     if(filtered.length === 0){
@@ -636,7 +702,6 @@
     document.getElementById('modeWeb').classList.toggle('active', mode==='web');
   }
 
-  /* ====== SENDING LOGIC (Multiple Tabs & 'To' field) ====== */
   function prepareSend(){
     const selected = contacts.filter(c=>c.selected);
     if(selected.length === 0){ showToast('Selecione ao menos um destinatário'); return; }
@@ -648,10 +713,9 @@
 
     let sendList = [...selected];
 
-    // Se tem apenas 1 selecionado, verifica o multiplicador de envio
     if(selected.length === 1) {
       let times = parseInt(document.getElementById('massSendCount').value) || 1;
-      if (times > 100) times = 100; // limite de segurança
+      if (times > 100) times = 100;
       sendList = [];
       for(let i=0; i<times; i++) {
         sendList.push(selected[0]);
@@ -660,13 +724,11 @@
 
     showToast(`Iniciando abertura de ${sendList.length} aba(s)... Permita os pop-ups!`);
     
-    // Loop de abertura em abas (com atraso para evitar bloqueio agressivo)
     let delay = 0;
     sendList.forEach((contato) => {
       setTimeout(() => {
         let url = '';
         if(sendMode === 'desktop'){
-          // Usando TO (Para) no lugar de BCC
           url = `mailto:${encodeURIComponent(contato.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         } else {
           url = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(contato.email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -674,16 +736,14 @@
         
         window.open(url, '_blank');
         
-        // Atualiza contagem localmente
         const ref = contacts.find(c => c.email === contato.email);
         if(ref) ref.sendCount += 1;
         
       }, delay);
       
-      delay += 800; // 800ms de atraso entre cada janela
+      delay += 800;
     });
 
-    // Desmarca os enviados após o término do loop
     setTimeout(() => {
       selected.forEach(c => c.selected = false);
       saveData();
