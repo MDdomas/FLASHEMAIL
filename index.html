@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flashemail v3.3 — Intelligence & Custom Groups</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Flashemail v3.4 — App Mobile & Safe Queue</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -22,7 +22,13 @@
     --blue-dim: #1e3a8a;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{height:100%;}
+  html,body{
+    height:100%;
+    width:100%;
+    overflow-x:hidden;
+    position:relative;
+    -webkit-text-size-adjust: 100%;
+  }
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(255,30,45,.16), transparent 60%),
@@ -31,86 +37,86 @@
     color:var(--white);
     font-family:'Space Grotesk', sans-serif;
     min-height:100vh;
-    overflow-x:hidden;
   }
   ::selection{ background:var(--red); color:var(--black); }
-  ::-webkit-scrollbar{width:10px;}
+  ::-webkit-scrollbar{width:6px;}
   ::-webkit-scrollbar-track{background:var(--black-2);}
   ::-webkit-scrollbar-thumb{background:var(--red-dim); border-radius:10px;}
 
   header{
     display:flex; align-items:center; justify-content:space-between;
-    padding:22px 5vw;
+    padding:18px 4vw;
     border-bottom:1px solid var(--line);
     position:sticky; top:0; z-index:40;
-    background:rgba(10,10,12,.85);
+    background:rgba(10,10,12,.9);
     backdrop-filter:blur(10px);
+    width: 100%;
   }
   .brand{ display:flex; align-items:center; gap:10px; }
-  .brand-mark{ width:34px; height:34px; position:relative; display:flex; align-items:center; justify-content:center; }
+  .brand-mark{ width:30px; height:30px; position:relative; display:flex; align-items:center; justify-content:center; }
   .brand-mark svg{ width:100%; height:100%; }
-  .brand-name{ font-family:'Archivo Black', sans-serif; font-size:20px; letter-spacing:-0.02em; }
+  .brand-name{ font-family:'Archivo Black', sans-serif; font-size:18px; letter-spacing:-0.02em; }
   .brand-name span{ color:var(--red); }
   .brand-tag{
-    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--gray);
-    border:1px solid var(--line); padding:3px 8px; border-radius:20px; letter-spacing:.04em;
+    font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--gray);
+    border:1px solid var(--line); padding:2px 6px; border-radius:20px; letter-spacing:.04em;
   }
   
-  .user-profile { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
-  .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--red-dim); color:var(--white); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold;}
+  .user-profile { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; }
+  .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--red-dim); color:var(--white); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold;}
 
-  main{ max-width:1180px; margin:0 auto; padding:48px 5vw 100px; }
+  main{ max-width:1180px; margin:0 auto; padding:30px 4vw 80px; width:100%; }
 
-  .hero{ margin-bottom:34px; }
+  .hero{ margin-bottom:24px; }
   .eyebrow{
-    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--red);
-    letter-spacing:.12em; text-transform:uppercase; margin-bottom:14px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--red);
+    letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;
     display:flex; align-items:center; gap:8px;
   }
-  .eyebrow::before{ content:''; width:22px; height:1px; background:var(--red); }
+  .eyebrow::before{ content:''; width:18px; height:1px; background:var(--red); }
   h1{
-    font-family:'Archivo Black', sans-serif; font-size:clamp(34px, 5vw, 58px);
-    line-height:0.98; letter-spacing:-0.02em; max-width:820px;
+    font-family:'Archivo Black', sans-serif; font-size:clamp(28px, 4.5vw, 48px);
+    line-height:1.05; letter-spacing:-0.02em; max-width:820px;
   }
   h1 .accent{ color:var(--red); }
-  .hero p{ margin-top:16px; color:var(--gray); font-size:16px; max-width:560px; }
+  .hero p{ margin-top:12px; color:var(--gray); font-size:14px; max-width:560px; }
 
   /* Navegação por Abas Principais */
-  .nav-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid var(--line); padding-bottom: 15px; }
-  .nav-tab { background: var(--black-2); border: 1px solid var(--line); color: var(--gray); padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+  .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 12px; overflow-x: auto; }
+  .nav-tab { background: var(--black-2); border: 1px solid var(--line); color: var(--gray); padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
   .nav-tab.active { background: rgba(255,30,45,.1); border-color: var(--red); color: var(--white); }
 
   .view-section { display: none; }
   .view-section.active { display: block; }
 
-  .grid{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:22px; }
+  .grid{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; }
   @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
 
   .panel{
     background:linear-gradient(180deg, var(--black-2), var(--black-3) 140%);
-    border:1px solid var(--line); border-radius:18px; padding:26px; position:relative;
+    border:1px solid var(--line); border-radius:16px; padding:20px; position:relative;
   }
   .panel::before{
-    content:''; position:absolute; top:0; left:26px; right:26px; height:1px;
+    content:''; position:absolute; top:0; left:20px; right:20px; height:1px;
     background:linear-gradient(90deg, transparent, var(--red), transparent); opacity:.5;
   }
-  .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
-  .panel-title{ font-family:'Archivo Black', sans-serif; font-size:16px; letter-spacing:-0.01em;}
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .panel-title{ font-family:'Archivo Black', sans-serif; font-size:15px; letter-spacing:-0.01em;}
   .panel-count{
-    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--red);
-    background:rgba(255,30,45,.1); border:1px solid var(--red-dim); padding:3px 10px; border-radius:20px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--red);
+    background:rgba(255,30,45,.1); border:1px solid var(--red-dim); padding:2px 8px; border-radius:20px;
   }
 
   label.field-label{
     display:block; font-family:'JetBrains Mono', monospace; font-size:11px;
-    color:var(--gray); letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px;
+    color:var(--gray); letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px;
   }
 
   .input-row{ display:flex; gap:8px; margin-bottom:10px; }
   input[type=text], input[type=email], input[type=password], input[type=number], textarea, select{
     width:100%; background:var(--black); border:1px solid var(--line);
     color:var(--white); border-radius:10px; padding:12px 14px;
-    font-family:'Space Grotesk', sans-serif; font-size:14px;
+    font-family:'Space Grotesk', sans-serif; font-size:16px; /* 16px evita zoom indesejado no iOS */
     transition:border-color .15s, box-shadow .15s;
   }
   select { appearance: none; cursor: pointer; }
@@ -130,21 +136,21 @@
   .btn-ghost{ background:transparent; border:1px solid var(--line); color:var(--white); }
   .btn-ghost:hover{ border-color:var(--red); color:var(--red); }
   .btn-block{ width:100%; }
-  .btn-sm{ padding:7px 12px; font-size:12px; border-radius:8px; }
+  .btn-sm{ padding:6px 10px; font-size:11px; border-radius:8px; }
 
-  .intelligence-box{ background: rgba(59, 130, 246, 0.05); border: 1px solid var(--blue-dim); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
-  .intel-header{ display: flex; align-items: center; justify-content:space-between; font-size: 13px; font-weight: 600; color: var(--blue); margin-bottom: 12px; }
-  .intel-actions{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom:12px; max-height: 100px; overflow-y: auto; }
-  .btn-intel{ background: transparent; border: 1px solid var(--line); color: var(--gray); font-size: 11px; padding: 6px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; }
+  .intelligence-box{ background: rgba(59, 130, 246, 0.05); border: 1px solid var(--blue-dim); border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+  .intel-header{ display: flex; align-items: center; justify-content:space-between; font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 10px; }
+  .intel-actions{ display: flex; gap: 6px; flex-wrap: wrap; margin-bottom:12px; max-height: 90px; overflow-y: auto; }
+  .btn-intel{ background: transparent; border: 1px solid var(--line); color: var(--gray); font-size: 11px; padding: 5px 8px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; }
   .btn-intel:hover, .btn-intel.active{ border-color: var(--blue); color: var(--blue); background:rgba(59,130,246,0.1); }
 
-  .group-manage-list { display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; margin-bottom: 14px; }
-  .group-manage-item { display: flex; align-items: center; justify-content: space-between; background: var(--black); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); font-size: 12px; }
+  .group-manage-list { display: flex; flex-direction: column; gap: 6px; max-height: 110px; overflow-y: auto; margin-bottom: 12px; }
+  .group-manage-item { display: flex; align-items: center; justify-content: space-between; background: var(--black); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); font-size: 11px; }
   .group-manage-item span { font-family: 'JetBrains Mono', monospace; }
 
-  .toggle-row{ display:flex; gap:8px; margin-bottom:16px; }
+  .toggle-row{ display:flex; gap:8px; margin-bottom:14px; }
   .toggle-row button{
-    flex:1; padding:9px; border-radius:9px; font-size:12px; font-weight:600;
+    flex:1; padding:8px; border-radius:8px; font-size:11px; font-weight:600;
     background:var(--black); border:1px solid var(--line); color:var(--gray);
   }
   .toggle-row button.active{ background:rgba(255,30,45,.12); border-color:var(--red); color:var(--white); }
@@ -152,7 +158,7 @@
   .bulk-area{ display:none; margin-bottom:12px; }
   .bulk-area.show{ display:block; }
 
-  .chip-list{ display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; margin-top:4px; padding-right:4px; }
+  .chip-list{ display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto; margin-top:4px; padding-right:2px; }
   .chip{
     display:flex; align-items:center; gap:10px; background:var(--black); border:1px solid var(--line);
     border-radius:10px; padding:10px 12px; transition: border-color 0.2s, background 0.2s;
@@ -169,70 +175,70 @@
     transform:rotate(45deg) translate(-1px,-1px);
   }
   .chip-content{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-  .chip-email{ font-size:13px; font-family:'JetBrains Mono', monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chip-email{ font-size:12px; font-family:'JetBrains Mono', monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .chip-meta{ display: flex; gap: 8px; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--gray); }
   
   .badge-group{ color: var(--white); background: var(--line); padding: 1px 6px; border-radius: 4px; }
   .badge-sent{ color: var(--blue); background: rgba(59, 130, 246, 0.15); padding: 1px 6px; border-radius: 4px; }
   
-  .chip-remove{ background:none; color:var(--gray); font-size:16px; line-height:1; padding:2px 6px; border-radius:6px; }
+  .chip-remove{ background:none; color:var(--gray); font-size:15px; line-height:1; padding:2px 6px; border-radius:6px; }
   .chip-remove:hover{ color:var(--red); background:rgba(255,30,45,.1); }
   
-  .empty-state{ text-align:center; padding:36px 10px; color:var(--gray); font-size:13px; border:1px dashed var(--line); border-radius:12px; }
+  .empty-state{ text-align:center; padding:30px 10px; color:var(--gray); font-size:12px; border:1px dashed var(--line); border-radius:12px; }
 
-  .select-actions{ display:flex; gap:8px; margin:14px 0 8px; }
+  .select-actions{ display:flex; gap:6px; margin:12px 0 6px; flex-wrap: wrap; }
 
-  .send-modes{ display:flex; gap:8px; margin-top:20px; }
+  .send-modes{ display:flex; gap:8px; margin-top:16px; }
   .send-mode{
-    flex:1; text-align:left; padding:14px; border-radius:12px;
+    flex:1; text-align:left; padding:12px; border-radius:10px;
     background:var(--black); border:1px solid var(--line); color:var(--white);
   }
-  .send-mode b{ display:block; font-size:13px; margin-bottom:4px; }
-  .send-mode span{ font-size:11px; color:var(--gray); font-family:'JetBrains Mono', monospace; }
+  .send-mode b{ display:block; font-size:12px; margin-bottom:2px; }
+  .send-mode span{ font-size:10px; color:var(--gray); font-family:'JetBrains Mono', monospace; }
   .send-mode.active{ border-color:var(--red); background:rgba(255,30,45,.08); }
 
   .mass-send-box {
       display:none; background:rgba(255,30,45,.05); border:1px solid var(--red-dim); 
-      padding:14px; border-radius:10px; margin-top:16px;
+      padding:12px; border-radius:10px; margin-top:14px;
   }
   .mass-send-box.show { display:block; }
 
   /* Tabela de Histórico de Inteligência */
-  .history-table-wrapper { width: 100%; overflow-x: auto; margin-top: 15px; max-height: 450px; overflow-y: auto; }
-  .history-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; font-family: 'Space Grotesk', sans-serif; }
-  .history-table th { background: var(--black); color: var(--gray); font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; padding: 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; }
-  .history-table td { padding: 12px; border-bottom: 1px solid var(--line); color: var(--white); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .history-table-wrapper { width: 100%; overflow-x: auto; margin-top: 12px; max-height: 400px; overflow-y: auto; }
+  .history-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; font-family: 'Space Grotesk', sans-serif; min-width: 500px; }
+  .history-table th { background: var(--black); color: var(--gray); font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; padding: 10px; border-bottom: 1px solid var(--line); position: sticky; top: 0; }
+  .history-table td { padding: 10px; border-bottom: 1px solid var(--line); color: var(--white); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
   .history-table tr:hover { background: rgba(255,255,255,0.02); }
 
   /* Overlay de Login / Cadastro */
   .overlay{
-    position:fixed; inset:0; background:rgba(6,6,7,.90); backdrop-filter:blur(6px);
-    display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+    position:fixed; inset:0; background:rgba(6,6,7,.92); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:16px;
   }
   .overlay.show{ display:flex; }
   .modal{
-    width:100%; max-width:420px; background:var(--black-2); border:1px solid var(--line);
-    border-radius:18px; padding:28px; position:relative;
-    box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,30,45,.08);
+    width:100%; max-width:380px; background:var(--black-2); border:1px solid var(--line);
+    border-radius:16px; padding:24px; position:relative;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
     animation:pop .18s ease;
   }
   @keyframes pop{ from{ transform:scale(.92); opacity:0;} to{ transform:scale(1); opacity:1;} }
-  .modal h3{ font-family:'Archivo Black', sans-serif; font-size:19px; margin-bottom:10px;}
-  .modal p{ color:var(--gray); font-size:13.5px; line-height:1.6; margin-bottom:16px; }
+  .modal h3{ font-family:'Archivo Black', sans-serif; font-size:18px; margin-bottom:8px;}
+  .modal p{ color:var(--gray); font-size:13px; line-height:1.5; margin-bottom:14px; }
   
-  .auth-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
-  .auth-tab { flex: 1; padding: 8px; background: var(--black); border: 1px solid var(--line); color: var(--gray); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .auth-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .auth-tab { flex: 1; padding: 8px; background: var(--black); border: 1px solid var(--line); color: var(--gray); border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; }
   .auth-tab.active { background: rgba(255,30,45,.1); border-color: var(--red); color: var(--white); }
 
   .login-box { text-align:left; }
-  .login-box h2 { font-family:'Archivo Black'; font-size:20px; margin-bottom:6px; }
+  .login-box h2 { font-family:'Archivo Black'; font-size:18px; margin-bottom:4px; }
 
-  footer{ text-align:center; padding:30px 5vw 50px; color:var(--gray); font-family:'JetBrains Mono', monospace; font-size:11px; border-top:1px solid var(--line); }
+  footer{ text-align:center; padding:24px 4vw 40px; color:var(--gray); font-family:'JetBrains Mono', monospace; font-size:10px; border-top:1px solid var(--line); width:100%; }
   .toast{
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px);
     background:var(--black-2); border:1px solid var(--red-dim); color:var(--white);
-    padding:12px 20px; border-radius:12px; font-size:13px; z-index:200;
-    opacity:0; pointer-events:none; transition:all .25s ease;
+    padding:10px 16px; border-radius:10px; font-size:12px; z-index:200;
+    opacity:0; pointer-events:none; transition:all .25s ease; width: 90%; max-width: 350px; text-align: center;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
@@ -242,7 +248,7 @@
 <!-- TELA DE LOGIN / CADASTRO SEPARADOS -->
 <div class="overlay show" id="loginOverlay" style="z-index: 999;">
   <div class="modal login-box">
-    <div class="brand-mark" style="margin: 0 auto 14px; width:44px; height:44px;">
+    <div class="brand-mark" style="margin: 0 auto 12px; width:38px; height:38px;">
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 L4 14 H11 L10 22 L20 9 H12.5 L13 2Z" fill="#ff1e2d"/></svg>
     </div>
     <h2 style="text-align:center;">Acesso ao Flashemail</h2>
@@ -253,12 +259,12 @@
       <button class="auth-tab" id="tabRegisterMode" onclick="setAuthMode('register')">Criar Cadastro</button>
     </div>
 
-    <div style="margin-bottom:12px;">
+    <div style="margin-bottom:10px;">
       <label class="field-label">Seu E-mail</label>
       <input type="email" id="authEmail" placeholder="seuemail@empresa.com">
     </div>
 
-    <div style="margin-bottom:20px;">
+    <div style="margin-bottom:18px;">
       <label class="field-label">Senha</label>
       <input type="password" id="authPassword" placeholder="••••••••">
     </div>
@@ -273,12 +279,12 @@
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 L4 14 H11 L10 22 L20 9 H12.5 L13 2Z" fill="#ff1e2d"/></svg>
     </div>
     <div class="brand-name">flash<span>email</span></div>
-    <div class="brand-tag">v3.3 · intelligence & groups</div>
+    <div class="brand-tag">v3.4</div>
   </div>
   <div class="user-profile" id="userProfile" style="display:none;">
     <span id="userNameDisplay">Usuário</span>
     <div class="user-avatar" id="userAvatarDisplay">U</div>
-    <button class="btn btn-ghost btn-sm" style="margin-left:10px; padding:4px 8px;" onclick="logout()">Sair</button>
+    <button class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 6px;" onclick="logout()">Sair</button>
   </div>
 </header>
 
@@ -286,7 +292,7 @@
   <section class="hero">
     <div class="eyebrow">disparo inteligente em lote</div>
     <h1>Gerencie grupos, dispare no <span class="accent">Outlook</span> e analise.</h1>
-    <p>Organize suas listas personalizadas, proteja contra bloqueios de pop-up e acompanhe métricas de disparos na aba de inteligência.</p>
+    <p>Organize suas listas personalizadas, proteja contra bloqueios e acompanhe métricas de disparos.</p>
   </section>
 
   <!-- Abas de Navegação Principal -->
@@ -309,12 +315,12 @@
           <div class="intel-header">
             <span>Gerenciar Grupos</span>
           </div>
-          <div class="input-row" style="margin-bottom:10px;">
+          <div class="input-row" style="margin-bottom:8px;">
             <input type="text" id="newGroupNameInput" placeholder="Nome do novo grupo...">
             <button class="btn btn-primary btn-sm" onclick="createNewGroup()">+ Criar</button>
           </div>
           <div class="group-manage-list" id="groupManageList">
-            <!-- Renderizado dinamicamente com botão de exclusão -->
+            <!-- Renderizado dinamicamente -->
           </div>
         </div>
 
@@ -330,10 +336,10 @@
 
         <label class="field-label">Salvar no Grupo:</label>
         <select id="addGroupSelect">
-          <!-- Renderizado Dinamicamente -->
+          <!-- Renderizado Dinamicamente com Sem Grupo -->
         </select>
 
-        <div id="singleAdd" style="margin-top:10px;">
+        <div id="singleAdd" style="margin-top:8px;">
           <label class="field-label">Endereço de e-mail do contato</label>
           <div class="input-row">
             <input type="email" id="singleEmailInput" placeholder="contato@empresa.com">
@@ -341,14 +347,14 @@
           </div>
         </div>
 
-        <div id="bulkAdd" class="bulk-area" style="margin-top:10px;">
-          <label class="field-label">Cole vários e-mails (vírgula, ; ou linha a linha)</label>
+        <div id="bulkAdd" class="bulk-area" style="margin-top:8px;">
+          <label class="field-label">Cole vários e-mails (vírgula, ; ou linha)</label>
           <textarea id="bulkEmailInput" placeholder="ana@empresa.com, joao@empresa.com"></textarea>
-          <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="addBulkEmails()">+ Adicionar lista</button>
+          <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addBulkEmails()">+ Adicionar lista</button>
         </div>
 
         <div class="select-actions">
-          <button class="btn btn-ghost btn-sm" onclick="selectAll(true)">Selecionar todos (do filtro)</button>
+          <button class="btn btn-ghost btn-sm" onclick="selectAll(true)">Selecionar filtro</button>
           <button class="btn btn-ghost btn-sm" onclick="selectAll(false)">Limpar seleção</button>
         </div>
 
@@ -368,35 +374,35 @@
           <!-- Renderizado Dinamicamente -->
         </select>
 
-        <label class="field-label" style="margin-top:10px;">Assunto</label>
+        <label class="field-label" style="margin-top:8px;">Assunto</label>
         <div class="input-row">
           <input type="text" id="subjectInput" placeholder="Ex: Atualização importante" oninput="saveGroupTemplate()">
         </div>
 
         <label class="field-label">Corpo da mensagem</label>
-        <textarea id="bodyInput" style="min-height:160px" placeholder="Escreva sua mensagem..." oninput="saveGroupTemplate()"></textarea>
+        <textarea id="bodyInput" style="min-height:140px" placeholder="Escreva sua mensagem..." oninput="saveGroupTemplate()"></textarea>
 
-        <!-- Opção de envio em massa para 1 email -->
+        <!-- Opção de envio em massa para 1 email (Fila controlada com limite de 10) -->
         <div class="mass-send-box" id="massSendBox">
-          <label class="field-label" style="color:var(--red);">🔥 Envio em Massa (Mesmo E-mail)</label>
-          <p style="font-size:12px; color:var(--gray); margin-bottom:8px;">Apenas 1 contato selecionado. Quantas vezes deseja enviar para ele?</p>
-          <input type="number" id="massSendCount" value="1" min="1" max="100" style="width:100px;">
+          <label class="field-label" style="color:var(--red);">🔥 Envio em Massa (Fila Controlada - 1 Contato)</label>
+          <p style="font-size:11px; color:var(--gray); margin-bottom:6px;">Apenas 1 contato selecionado. Quantas vezes deseja enviar? (Máx. 10 seguro)</p>
+          <input type="number" id="massSendCount" value="1" min="1" max="10" style="width:90px;">
         </div>
 
-        <label class="field-label" style="margin-top:18px;">Modo de Abertura (Abas Individuais)</label>
+        <label class="field-label" style="margin-top:14px;">Modo de Abertura</label>
         <div class="send-modes">
           <button class="send-mode active" id="modeDesktop" onclick="setSendMode('desktop')">
             <b>Outlook Desktop / App</b>
-            <span>App padrão do sistema (mailto)</span>
+            <span>App padrão (mailto)</span>
           </button>
           <button class="send-mode" id="modeWeb" onclick="setSendMode('web')">
             <b>Outlook na Web</b>
-            <span>Abre outlook.office.com</span>
+            <span>outlook.office.com</span>
           </button>
         </div>
 
-        <div class="cta-row" style="margin-top:20px;">
-          <button class="btn btn-primary btn-block" onclick="prepareSend()">⚡ Abrir Abas de Envio (Sequencial Seguro)</button>
+        <div class="cta-row" style="margin-top:16px;">
+          <button class="btn btn-primary btn-block" onclick="prepareSend()">⚡ Iniciar Disparo Seguro</button>
         </div>
       </div>
     </div>
@@ -409,7 +415,7 @@
         <div class="panel-title">Métricas & Histórico de Disparos</div>
         <div class="panel-count" id="historyCountBadge">0 registros</div>
       </div>
-      <p style="color:var(--gray); font-size:13px; margin-bottom:15px;">Visualize abaixo todos os e-mails disparados, separados por grupo, endereço e data de envio.</p>
+      <p style="color:var(--gray); font-size:12px; margin-bottom:12px;">Visualize abaixo todos os e-mails disparados, separados por grupo, endereço e data de envio.</p>
       
       <div class="history-table-wrapper">
         <table class="history-table">
@@ -419,7 +425,7 @@
               <th>E-mail Destinatário</th>
               <th>Grupo</th>
               <th>Assunto</th>
-              <th>Total Disparos</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="historyTableBody">
@@ -432,7 +438,7 @@
 </main>
 
 <footer>
-  <b>Flashemail v3.3</b> — Grupos dinâmicos, controle de autenticação, envio sequencial e inteligência de disparos.
+  <b>Flashemail v3.4</b> — Mobile App View, CCO Automático e Fila Controlada.
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -440,7 +446,7 @@
 <script>
   /* ====== AUTHENTICATION & LOGIN/REGISTER MODES ====== */
   let currentUser = null;
-  let currentAuthMode = 'login'; // 'login' or 'register'
+  let currentAuthMode = 'login';
 
   function setAuthMode(mode) {
     currentAuthMode = mode;
@@ -465,9 +471,8 @@
     let users = JSON.parse(localStorage.getItem('flashemail_db_users') || '{}');
 
     if(currentAuthMode === 'login') {
-      // Modo Entrar
       if(!users[emailInput]) {
-        showToast('Não há cadastro para este e-mail. Por favor, cadastre-se primeiro.');
+        showToast('Não há cadastro para este e-mail. Cadastre-se primeiro.');
         setAuthMode('register');
         return;
       }
@@ -476,7 +481,6 @@
         return;
       }
     } else {
-      // Modo Cadastro
       if(users[emailInput]) {
         showToast('Este e-mail já possui cadastro. Faça login.');
         setAuthMode('login');
@@ -520,38 +524,30 @@
   let addMode = 'single';
   let sendMode = 'desktop';
   let templates = {};
-  let lastInfo = { email: '', group: '' };
+  let lastInfo = { email: '', group: 'Sem Grupo' };
 
   function loadData() {
     if(!currentUser) return;
-    const keyPrefix = `flashemail_v33_${currentUser}`;
+    const keyPrefix = `flashemail_v34_${currentUser}`;
     
     const savedGroups = localStorage.getItem(`${keyPrefix}_groups`);
-    if(savedGroups) {
-      groups = JSON.parse(savedGroups);
-    } else {
-      groups = []; // Sem exemplos fixos conforme solicitado
-    }
+    groups = savedGroups ? JSON.parse(savedGroups) : [];
 
     const savedContacts = localStorage.getItem(`${keyPrefix}_contacts`);
-    if(savedContacts) contacts = JSON.parse(savedContacts);
+    contacts = savedContacts ? JSON.parse(savedContacts) : [];
     
     const savedTemplates = localStorage.getItem(`${keyPrefix}_templates`);
-    if(savedTemplates) {
-      templates = JSON.parse(savedTemplates);
-    } else {
-      templates = {};
-    }
+    templates = savedTemplates ? JSON.parse(savedTemplates) : {};
 
     const savedHistory = localStorage.getItem(`${keyPrefix}_history`);
-    if(savedHistory) historyLog = JSON.parse(savedHistory);
+    historyLog = savedHistory ? JSON.parse(savedHistory) : [];
 
     renderAll();
   }
 
   function saveData() {
     if(!currentUser) return;
-    const keyPrefix = `flashemail_v33_${currentUser}`;
+    const keyPrefix = `flashemail_v34_${currentUser}`;
     localStorage.setItem(`${keyPrefix}_groups`, JSON.stringify(groups));
     localStorage.setItem(`${keyPrefix}_contacts`, JSON.stringify(contacts));
     localStorage.setItem(`${keyPrefix}_templates`, JSON.stringify(templates));
@@ -561,15 +557,13 @@
 
   function restoreLastInfo() {
     if(!currentUser) return;
-    const savedLast = localStorage.getItem(`flashemail_v33_${currentUser}_lastInfo`);
-    if(savedLast && groups.length > 0) {
+    const savedLast = localStorage.getItem(`flashemail_v34_${currentUser}_lastInfo`);
+    if(savedLast) {
       lastInfo = JSON.parse(savedLast);
-      if(groups.includes(lastInfo.group)) {
-        document.getElementById('singleEmailInput').value = lastInfo.email || '';
-        document.getElementById('addGroupSelect').value = lastInfo.group;
-        document.getElementById('composerGroupSelect').value = lastInfo.group;
-        loadGroupTemplate();
-      }
+      document.getElementById('singleEmailInput').value = lastInfo.email || '';
+      document.getElementById('addGroupSelect').value = lastInfo.group || 'Sem Grupo';
+      document.getElementById('composerGroupSelect').value = lastInfo.group || 'Sem Grupo';
+      loadGroupTemplate();
     }
   }
 
@@ -605,6 +599,11 @@
       return;
     }
 
+    if(groupName.toLowerCase() === 'sem grupo') {
+      showToast('Nome reservado.');
+      return;
+    }
+
     if(groups.map(g=>g.toLowerCase()).includes(groupName.toLowerCase())) {
       showToast('Este grupo já existe.');
       return;
@@ -622,19 +621,14 @@
   }
 
   function deleteGroup(groupName) {
-    if(!confirm(`Deseja realmente apagar o grupo "${groupName}"? Os contatos vinculados ficarão sem grupo.`)) return;
+    if(!confirm(`Deseja realmente apagar o grupo "${groupName}"? Os contatos vinculados passarão para "Sem Grupo".`)) return;
 
     groups = groups.filter(g => g !== groupName);
     delete templates[groupName];
 
-    // Atualiza contatos que estavam neste grupo
     contacts.forEach(c => {
       if(c.group === groupName) c.group = 'Sem Grupo';
     });
-
-    if(!groups.includes('Sem Grupo') && contacts.some(c => c.group === 'Sem Grupo')) {
-      groups.push('Sem Grupo');
-    }
 
     if(currentGroupFilter === groupName) currentGroupFilter = 'todos';
 
@@ -654,7 +648,7 @@
   function renderGroupManagementList() {
     const container = document.getElementById('groupManageList');
     if(groups.length === 0) {
-      container.innerHTML = '<div style="font-size:11px; color:var(--gray); text-align:center; padding:6px;">Nenhum grupo criado.</div>';
+      container.innerHTML = '<div style="font-size:10px; color:var(--gray); text-align:center; padding:4px;">Nenhum grupo customizado criado.</div>';
       return;
     }
     container.innerHTML = groups.map(g => `
@@ -668,6 +662,7 @@
   function renderGroupFilters() {
     const container = document.getElementById('groupFilters');
     let html = `<button class="btn-intel ${currentGroupFilter === 'todos' ? 'active':''}" onclick="filterByGroup('todos')">Todos</button>`;
+    html += `<button class="btn-intel ${currentGroupFilter === 'Sem Grupo' ? 'active':''}" onclick="filterByGroup('Sem Grupo')">Sem Grupo</button>`;
     
     groups.forEach(g => {
       html += `<button class="btn-intel ${currentGroupFilter === g ? 'active':''}" onclick="filterByGroup('${g}')">${g}</button>`;
@@ -679,22 +674,19 @@
     const addSelect = document.getElementById('addGroupSelect');
     const composerSelect = document.getElementById('composerGroupSelect');
     
-    if(groups.length === 0) {
-      addSelect.innerHTML = '<option value="">Crie um grupo primeiro</option>';
-      composerSelect.innerHTML = '<option value="">Crie um grupo primeiro</option>';
-      return;
-    }
-
-    let html = groups.map(g => `<option value="${g}">${g}</option>`).join('');
+    let html = '<option value="Sem Grupo">Sem Grupo</option>';
+    groups.forEach(g => {
+      html += `<option value="${g}">${g}</option>`;
+    });
     
-    const currentAddVal = addSelect.value;
-    const currentCompVal = composerSelect.value;
+    const currentAddVal = addSelect.value || 'Sem Grupo';
+    const currentCompVal = composerSelect.value || 'Sem Grupo';
 
     addSelect.innerHTML = html;
     composerSelect.innerHTML = html;
 
-    if(groups.includes(currentAddVal)) addSelect.value = currentAddVal;
-    if(groups.includes(currentCompVal)) composerSelect.value = currentCompVal;
+    addSelect.value = currentAddVal;
+    composerSelect.value = currentCompVal;
   }
 
   function setAddMode(mode){
@@ -709,7 +701,7 @@
     currentGroupFilter = group;
     renderGroupFilters();
     
-    if (group !== 'todos' && groups.includes(group)) {
+    if (group !== 'todos') {
       document.getElementById('composerGroupSelect').value = group;
       loadGroupTemplate();
     }
@@ -717,8 +709,8 @@
   }
 
   function loadGroupTemplate() {
-    const group = document.getElementById('composerGroupSelect').value;
-    if(!group || !templates[group]) {
+    const group = document.getElementById('composerGroupSelect').value || 'Sem Grupo';
+    if(!templates[group]) {
       document.getElementById('subjectInput').value = '';
       document.getElementById('bodyInput').value = '';
       return;
@@ -728,8 +720,7 @@
   }
 
   function saveGroupTemplate() {
-    const group = document.getElementById('composerGroupSelect').value;
-    if(!group) return;
+    const group = document.getElementById('composerGroupSelect').value || 'Sem Grupo';
     if(!templates[group]) templates[group] = { subject: '', body: '' };
     
     templates[group] = {
@@ -740,9 +731,8 @@
   }
 
   function addSingleEmail(){
-    if(groups.length === 0) { showToast('Crie pelo menos um grupo antes de adicionar e-mails.'); return; }
     const input = document.getElementById('singleEmailInput');
-    const group = document.getElementById('addGroupSelect').value;
+    const group = document.getElementById('addGroupSelect').value || 'Sem Grupo';
     const val = input.value.trim();
     if(!val) return;
     if(!isValidEmail(val)){ showToast('E-mail inválido'); return; }
@@ -761,9 +751,8 @@
   });
 
   function addBulkEmails(){
-    if(groups.length === 0) { showToast('Crie pelo menos um grupo antes de adicionar e-mails.'); return; }
     const raw = document.getElementById('bulkEmailInput').value;
-    const group = document.getElementById('addGroupSelect').value;
+    const group = document.getElementById('addGroupSelect').value || 'Sem Grupo';
     const parts = raw.split(/[,;\n]/).map(s=>s.trim()).filter(Boolean);
     let added = 0;
     
@@ -776,7 +765,7 @@
       saveData();
       renderContacts();
       document.getElementById('bulkEmailInput').value = '';
-      showToast(`${added} e-mail(s) adicionados ao grupo ${group}`);
+      showToast(`${added} e-mail(s) adicionados!`);
     } else {
       showToast('Nenhum e-mail válido encontrado.');
     }
@@ -856,71 +845,110 @@
     document.getElementById('modeWeb').classList.toggle('active', mode==='web');
   }
 
-  /* ====== ENVIO SEQUENCIAL SEGURO (ANTI POP-UP BLOCKER) ====== */
+  /* ====== LÓGICA DE ENVIO INTELIGENTE (OPÇÃO 1 CCO / OPÇÃO 2 FILA CONTROLADA) ====== */
   function prepareSend(){
-    const selected = contacts.filter(c=>c.selected);
-    if(selected.length === 0){ showToast('Selecione ao menos um destinatário'); return; }
+    const selected = contacts.filter(c => c.selected);
+    if(selected.length === 0){ 
+      showToast('Selecione ao menos um destinatário'); 
+      return; 
+    }
     
     const subject = document.getElementById('subjectInput').value.trim();
     const body = document.getElementById('bodyInput').value;
-    const composerGroup = document.getElementById('composerGroupSelect').value || 'Geral';
+    const composerGroup = document.getElementById('composerGroupSelect').value || 'Sem Grupo';
     
-    if(!subject) { showToast('Adicione um assunto no template!'); return; }
+    if(!subject) { 
+      showToast('Adicione um assunto no template!'); 
+      return; 
+    }
 
-    let sendList = [...selected];
+    const nowTimestamp = new Date().toLocaleString('pt-BR');
 
+    // CASO 2: Apenas 1 endereço selecionado E lote maior que 1 -> Opção 2 (Fila Controlada no "Para:")
     if(selected.length === 1) {
       let times = parseInt(document.getElementById('massSendCount').value) || 1;
-      if (times > 100) times = 100;
-      sendList = [];
-      for(let i=0; i<times; i++) {
-        sendList.push(selected[0]);
+      
+      // Limite máximo seguro por lote para evitar bloqueio e travamento
+      if (times > 10) {
+        times = 10;
+        showToast('O limite seguro por lote é de até 10 envios.');
+      }
+      
+      if(times > 1) {
+        showToast(`Iniciando fila controlada (${times} disparos)...`);
+        let delay = 0;
+
+        for(let i = 0; i < times; i++) {
+          setTimeout(() => {
+            const url = sendMode === 'desktop'
+              ? `mailto:${encodeURIComponent(selected[0].email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+              : `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(selected[0].email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            window.open(url, '_blank');
+            
+            selected[0].sendCount += 1;
+            historyLog.unshift({
+              date: nowTimestamp,
+              email: selected[0].email,
+              group: selected[0].group || composerGroup,
+              subject: subject
+            });
+
+            saveData();
+            renderContacts();
+          }, delay);
+          delay += 1500; // Intervalo seguro de 1.5s entre cada aba
+        }
+        selected[0].selected = false;
+        saveData();
+        renderContacts();
+        return;
       }
     }
 
-    showToast(`Iniciando disparos sequenciais (${sendList.length} abas)... Mantenha o navegador liberado.`);
-    
-    let delay = 0;
-    const nowTimestamp = new Date().toLocaleString('pt-BR');
-
-    sendList.forEach((contato) => {
-      setTimeout(() => {
-        let url = '';
-        if(sendMode === 'desktop'){
-          url = `mailto:${encodeURIComponent(contato.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        } else {
-          url = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(contato.email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        }
-        
-        window.open(url, '_blank');
-        
-        // Atualiza contagem do contato
-        const ref = contacts.find(c => c.email === contato.email);
-        if(ref) ref.sendCount += 1;
-
-        // Adiciona ao histórico de inteligência
-        historyLog.unshift({
-          date: nowTimestamp,
-          email: contato.email,
-          group: contato.group || composerGroup,
-          subject: subject
-        });
-
-        saveData();
-        renderContacts();
-        
-      }, delay);
+    // CASO ÚNICO SIMPLES (1 selecionado, lote 1)
+    if(selected.length === 1) {
+      const url = sendMode === 'desktop'
+        ? `mailto:${encodeURIComponent(selected[0].email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+        : `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(selected[0].email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       
-      // Intervalo seguro de 1200ms por aba para impedir bloqueio de pop-up pelo navegador
-      delay += 1200;
-    });
-
-    setTimeout(() => {
-      selected.forEach(c => c.selected = false);
+      window.open(url, '_blank');
+      selected[0].sendCount += 1;
+      historyLog.unshift({
+        date: nowTimestamp,
+        email: selected[0].email,
+        group: selected[0].group || composerGroup,
+        subject: subject
+      });
+      selected[0].selected = false;
       saveData();
       renderContacts();
-      showToast('Disparos concluídos com sucesso!');
-    }, delay + 500);
+      showToast('Aba de envio aberta com sucesso!');
+      return;
+    }
+
+    // CASO 1: Múltiplos contatos selecionados (Envio de Grupo) -> Opção 1 (CCO unificado em aba única)
+    const emailsList = selected.map(c => c.email).join(';');
+    const url = sendMode === 'desktop'
+      ? `mailto:?bcc=${encodeURIComponent(emailsList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+      : `https://outlook.office.com/mail/deeplink/compose?bcc=${encodeURIComponent(emailsList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.open(url, '_blank');
+
+    selected.forEach(c => {
+      c.sendCount += 1;
+      historyLog.unshift({
+        date: nowTimestamp,
+        email: c.email,
+        group: c.group || composerGroup,
+        subject: subject
+      });
+      c.selected = false;
+    });
+
+    saveData();
+    renderContacts();
+    showToast('Aba de disparo em grupo (CCO) aberta com sucesso!');
   }
 
   function renderHistoryTable() {
@@ -932,13 +960,12 @@
       return;
     }
 
-    // Agrupa contagem por e-mail no histórico ou lista um a um
     tbody.innerHTML = historyLog.map(h => `
       <tr>
         <td>${h.date}</td>
         <td>${h.email}</td>
         <td><span class="badge-group">${h.group}</span></td>
-        <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${h.subject}</td>
+        <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${h.subject}</td>
         <td><span class="badge-sent">Disparado</span></td>
       </tr>
     `).join('');
