@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashemail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black: #0a0a0c;
+    --black-2: #131316;
+    --black-3: #1c1c20;
+    --red: #ff1e2d;
+    --red-deep: #9c0014;
+    --red-dim: #4a0b12;
+    --white: #f4f4f2;
+    --gray: #86868f;
+    --line: #29292f;
+    --ok: #21c37a;
+    --blue: #3b82f6;
+    --blue-dim: #1e3a8a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(255,30,45,.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(255,30,45,.10), transparent 60%),
+      var(--black);
+    color:var(--white);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--red); color:var(--black); }
+  ::-webkit-scrollbar{width:10px;}
+  ::-webkit-scrollbar-track{background:var(--black-2);}
+  ::-webkit-scrollbar-thumb{background:var(--red-dim); border-radius:10px;}
+
+  .bolt-mark{
+    display:inline-block; width:1em; height:1em;
+    background: var(--red);
+    clip-path: polygon(58% 0, 8% 58%, 46% 58%, 40% 100%, 92% 40%, 54% 40%);
+    filter: drop-shadow(0 0 10px rgba(255,30,45,.7));
+  }
+
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 5vw;
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:40;
+    background:rgba(10,10,12,.85);
+    backdrop-filter:blur(10px);
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{
+    width:34px; height:34px; position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .brand-mark svg{ width:100%; height:100%; }
+  .brand-name{
+    font-family:'Archivo Black', sans-serif;
+    font-size:20px; letter-spacing:-0.02em;
+  }
+  .brand-name span{ color:var(--red); }
+  .brand-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; color:var(--gray);
+    border:1px solid var(--line); padding:3px 8px; border-radius:20px;
+    letter-spacing:.04em;
+  }
+  .status-pill{
+    font-family:'JetBrains Mono', monospace; font-size:12px;
+    display:flex; align-items:center; gap:8px; color:var(--gray);
+  }
+  .status-dot{ width:8px; height:8px; border-radius:50%; background:var(--ok); box-shadow:0 0 8px var(--ok); }
+
+  main{ max-width:1180px; margin:0 auto; padding:48px 5vw 100px; }
+
+  .hero{ margin-bottom:44px; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--red);
+    letter-spacing:.12em; text-transform:uppercase; margin-bottom:14px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{ content:''; width:22px; height:1px; background:var(--red); }
+  h1{
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(34px, 5vw, 58px);
+    line-height:0.98; letter-spacing:-0.02em;
+    max-width:820px;
+  }
+  h1 .accent{ color:var(--red); }
+  .hero p{
+    margin-top:16px; color:var(--gray); font-size:16px; max-width:560px;
+  }
+
+  .flow{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line);
+    margin:36px 0 48px; border-radius:14px; overflow:hidden;
+  }
+  .flow-step{
+    background:var(--black-2); padding:16px 18px; font-family:'JetBrains Mono', monospace;
+  }
+  .flow-step b{ display:block; color:var(--red); font-size:11px; letter-spacing:.08em; margin-bottom:6px;}
+  .flow-step span{ font-family:'Space Grotesk', sans-serif; font-size:13px; color:var(--white); }
+
+  .grid{
+    display:grid; grid-template-columns: 1.1fr 1.4fr; gap:22px;
+  }
+  @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--black-2), var(--black-3) 140%);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:26px;
+    position:relative;
+  }
+  .panel::before{
+    content:''; position:absolute; top:0; left:26px; right:26px; height:1px;
+    background:linear-gradient(90deg, transparent, var(--red), transparent);
+    opacity:.5;
+  }
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+  .panel-title{ font-family:'Archivo Black', sans-serif; font-size:16px; letter-spacing:-0.01em;}
+  .panel-count{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--red);
+    background:rgba(255,30,45,.1); border:1px solid var(--red-dim);
+    padding:3px 10px; border-radius:20px;
+  }
+
+  label.field-label{
+    display:block; font-family:'JetBrains Mono', monospace; font-size:11px;
+    color:var(--gray); letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px;
+  }
+
+  .input-row{ display:flex; gap:8px; margin-bottom:10px; }
+  input[type=text], input[type=email], textarea{
+    width:100%; background:var(--black); border:1px solid var(--line);
+    color:var(--white); border-radius:10px; padding:12px 14px;
+    font-family:'Space Grotesk', sans-serif; font-size:14px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=text]:focus, input[type=email]:focus, textarea:focus{
+    outline:none; border-color:var(--red); box-shadow:0 0 0 3px rgba(255,30,45,.15);
+  }
+  textarea{ resize:vertical; min-height:70px; }
+  ::placeholder{ color:#5a5a63; }
+
+  button{ font-family:'Space Grotesk', sans-serif; cursor:pointer; border:none; }
+
+  .btn{
+    padding:12px 18px; border-radius:10px; font-size:13px; font-weight:600;
+    display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:active{ transform:scale(.96); }
+  .btn-primary{ background:var(--red); color:#100; }
+  .btn-primary:hover{ filter:brightness(1.12); }
+  .btn-ghost{
+    background:transparent; border:1px solid var(--line); color:var(--white);
+  }
+  .btn-ghost:hover{ border-color:var(--red); color:var(--red); }
+  .btn-block{ width:100%; justify-content:center; }
+  .btn-sm{ padding:7px 12px; font-size:12px; border-radius:8px; }
+
+  .intelligence-box{
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid var(--blue-dim);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .intel-header{
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--blue);
+    margin-bottom: 12px;
+  }
+  .intel-stats{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
+  }
+  .stat-card{
+    background: var(--black); border: 1px solid var(--line);
+    padding: 10px 12px; border-radius: 8px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat-card span{ font-size: 11px; color: var(--gray); font-family: 'JetBrains Mono', monospace; }
+  .stat-card b{ font-size: 16px; font-family: 'Archivo Black', sans-serif; }
+  .intel-actions{
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .btn-intel{
+    background: transparent; border: 1px solid var(--line); color: var(--gray);
+    font-size: 11px; padding: 6px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;
+  }
+  .btn-intel:hover{ border-color: var(--blue); color: var(--blue); }
+
+  .toggle-row{ display:flex; gap:8px; margin-bottom:16px; }
+  .toggle-row button{
+    flex:1; padding:9px; border-radius:9px; font-size:12px; font-weight:600;
+    background:var(--black); border:1px solid var(--line); color:var(--gray);
+  }
+  .toggle-row button.active{
+    background:rgba(255,30,45,.12); border-color:var(--red); color:var(--white);
+  }
+
+  .bulk-area{ display:none; margin-bottom:12px; }
+  .bulk-area.show{ display:block; }
+
+  .chip-list{
+    display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto;
+    margin-top:4px; padding-right:4px;
+  }
+  .chip{
+    display:flex; align-items:center; gap:10px;
+    background:var(--black); border:1px solid var(--line);
+    border-radius:10px; padding:10px 12px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .chip.selected{ border-color:var(--red-dim); background:rgba(255,30,45,.06); }
+  .chip input[type=checkbox]{
+    appearance:none; width:18px; height:18px; min-width:18px;
+    border:1.5px solid var(--gray); border-radius:5px; cursor:pointer;
+    display:grid; place-content:center; background:var(--black);
+  }
+  .chip input[type=checkbox]:checked{ background:var(--red); border-color:var(--red); }
+  .chip input[type=checkbox]:checked::after{
+    content:''; width:5px; height:9px; border:solid #0a0a0c; border-width:0 2px 2px 0;
+    transform:rotate(45deg) translate(-1px,-1px);
+  }
+  .chip-content{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .chip-email{ font-size:13px; font-family:'JetBrains Mono', monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chip-meta{
+    display: flex; gap: 8px; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--gray);
+  }
+  .chip-meta .badge-sent{
+    color: var(--blue); background: rgba(59, 130, 246, 0.15); padding: 1px 6px; border-radius: 4px;
+  }
+  .chip-meta .badge-none{
+    color: var(--gray); background: var(--black-3); padding: 1px 6px; border-radius: 4px;
+  }
+  .chip-remove{
+    background:none; color:var(--gray); font-size:16px; line-height:1; padding:2px 6px; border-radius:6px;
+  }
+  .chip-remove:hover{ color:var(--red); background:rgba(255,30,45,.1); }
+  .empty-state{
+    text-align:center; padding:36px 10px; color:var(--gray); font-size:13px;
+    border:1px dashed var(--line); border-radius:12px;
+  }
+
+  .select-actions{ display:flex; gap:8px; margin:14px 0 8px; }
+
+  .send-modes{ display:flex; gap:8px; margin-top:20px; }
+  .send-mode{
+    flex:1; text-align:left; padding:14px; border-radius:12px;
+    background:var(--black); border:1px solid var(--line); color:var(--white);
+  }
+  .send-mode b{ display:block; font-size:13px; margin-bottom:4px; }
+  .send-mode span{ font-size:11px; color:var(--gray); font-family:'JetBrains Mono', monospace; }
+  .send-mode.active{ border-color:var(--red); background:rgba(255,30,45,.08); }
+
+  .cta-row{ margin-top:20px; display:flex; gap:10px; align-items:center; }
+  .char-count{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--gray); }
+
+  .overlay{
+    position:fixed; inset:0; background:rgba(6,6,7,.75); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .overlay.show{ display:flex; }
+  .modal{
+    width:100%; max-width:460px; background:var(--black-2); border:1px solid var(--line);
+    border-radius:18px; padding:28px; position:relative;
+    box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,30,45,.08);
+    animation:pop .18s ease;
+  }
+  @keyframes pop{ from{ transform:scale(.92); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  .modal-icon{
+    width:48px; height:48px; border-radius:12px; background:rgba(255,30,45,.12);
+    display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px;
+  }
+  .modal h3{ font-family:'Archivo Black', sans-serif; font-size:19px; margin-bottom:10px; letter-spacing:-.01em;}
+  .modal p{ color:var(--gray); font-size:13.5px; line-height:1.6; margin-bottom:8px; }
+  .modal ul{ margin:12px 0; padding-left:0; list-style:none; }
+  .modal li{
+    font-size:13px; color:var(--white); display:flex; gap:8px; margin-bottom:8px; align-items:flex-start;
+  }
+  .modal li::before{ content:'—'; color:var(--red); }
+  .modal-actions{ display:flex; gap:10px; margin-top:22px; }
+  .modal-close{
+    position:absolute; top:18px; right:18px; background:none; color:var(--gray); font-size:18px;
+    width:28px; height:28px; border-radius:8px;
+  }
+  .modal-close:hover{ color:var(--white); background:var(--black-3); }
+
+  footer{
+    text-align:center; padding:30px 5vw 50px; color:var(--gray);
+    font-family:'JetBrains Mono', monospace; font-size:11px; border-top:1px solid var(--line);
+  }
+  footer b{ color:var(--red); }
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--black-2); border:1px solid var(--red-dim); color:var(--white);
+    padding:12px 20px; border-radius:12px; font-size:13px; z-index:200;
+    opacity:0; pointer-events:none; transition:all .25s ease;
+    display:flex; align-items:center; gap:10px;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 L4 14 H11 L10 22 L20 9 H12.5 L13 2Z" fill="#ff1e2d"/></svg>
+    </div>
+    <div class="brand-name">flash<span>email</span></div>
+    <div class="brand-tag">v2.0 · local & smart</div>
+  </div>
+  <div class="status-pill"><span class="status-dot"></span> pronto para disparar</div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">disparo em lote sem servidor</div>
+    <h1>Monte a lista. Escreva uma vez.<br>Dispare no <span class="accent">Outlook</span>.</h1>
+    <p>Gerencie seus contatos localmente, acompanhe quem já recebeu suas mensagens e abra o Outlook já pronto para envio.</p>
+  </section>
+
+  <div class="flow">
+    <div class="flow-step"><b>01 · CADASTRAR</b><span>Adicione ou cole os e-mails</span></div>
+    <div class="flow-step"><b>02 · SELECIONAR</b><span>Use os filtros inteligentes</span></div>
+    <div class="flow-step"><b>03 · REDIGIR</b><span>Assunto e mensagem</span></div>
+    <div class="flow-step"><b>04 · DISPARAR</b><span>Abre o Outlook pronto</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Contatos & Inteligência</div>
+        <div class="panel-count" id="countBadge">0 cadastrados</div>
+      </div>
+
+      <!-- Novo Bloco de Inteligência -->
+      <div class="intelligence-box">
+        <div class="intel-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          Métricas de Disparo Local
+        </div>
+        <div class="intel-stats">
+          <div class="stat-card">
+            <span>Total de envios gerados</span>
+            <b id="statTotalSends">0</b>
+          </div>
+          <div class="stat-card">
+            <span>Contatos pendentes (0 envios)</span>
+            <b id="statUnsent">0</b>
+          </div>
+        </div>
+        <div class="intel-actions">
+          <button class="btn-intel" onclick="selectUnsent()">Selecionar Pendentes (0)</button>
+          <button class="btn-intel" onclick="selectSent()">Selecionar Já Enviados</button>
+          <button class="btn-intel" style="color:var(--gray); border-color:var(--line);" onclick="resetAnalytics()">Zerar Contagens</button>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <button class="active" id="tabSingle" onclick="setAddMode('single')">Adicionar um a um</button>
+        <button id="tabBulk" onclick="setAddMode('bulk')">Colar vários</button>
+      </div>
+
+      <div id="singleAdd">
+        <label class="field-label">Endereço de e-mail</label>
+        <div class="input-row">
+          <input type="email" id="singleEmailInput" placeholder="nome@empresa.com">
+          <button class="btn btn-primary btn-sm" onclick="addSingleEmail()">+ Add</button>
+        </div>
+      </div>
+
+      <div id="bulkAdd" class="bulk-area">
+        <label class="field-label">Cole vários e-mails (vírgula, ; ou linha por linha)</label>
+        <textarea id="bulkEmailInput" placeholder="ana@empresa.com, joao@empresa.com&#10;maria@empresa.com"></textarea>
+        <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="addBulkEmails()">+ Adicionar lista</button>
+      </div>
+
+      <div class="select-actions">
+        <button class="btn btn-ghost btn-sm" onclick="selectAll(true)">Selecionar todos</button>
+        <button class="btn btn-ghost btn-sm" onclick="selectAll(false)">Limpar seleção</button>
+      </div>
+
+      <div class="chip-list" id="chipList">
+        <div class="empty-state">Nenhum e-mail cadastrado ainda.<br>Adicione o primeiro acima ⚡</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Mensagem</div>
+        <div class="panel-count" id="selectedBadge">0 selecionados</div>
+      </div>
+
+      <label class="field-label">Assunto</label>
+      <div class="input-row">
+        <input type="text" id="subjectInput" placeholder="Ex: Atualização importante — leia com atenção">
+      </div>
+
+      <label class="field-label">Corpo da mensagem</label>
+      <textarea id="bodyInput" style="min-height:160px" placeholder="Escreva sua mensagem aqui..."></textarea>
+      <div style="text-align:right; margin-top:6px;">
+        <span class="char-count" id="charCount">0 caracteres</span>
+      </div>
+
+      <label class="field-label" style="margin-top:18px;">Como abrir o Outlook</label>
+      <div class="send-modes">
+        <button class="send-mode active" id="modeDesktop" onclick="setSendMode('desktop')">
+          <b>Outlook Desktop / App</b>
+          <span>usa o app padrão do sistema (mailto)</span>
+        </button>
+        <button class="send-mode" id="modeWeb" onclick="setSendMode('web')">
+          <b>Outlook na Web</b>
+          <span>abre outlook.office.com já logado</span>
+        </button>
+      </div>
+
+      <div class="cta-row">
+        <button class="btn btn-primary btn-block" onclick="openSendModal()">⚡ Enviar via Outlook</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <b>Flashemail</b> — dados e métricas são salvos <b>apenas no seu navegador (Local Storage)</b>. Nada vai para a nuvem.
+</footer>
+
+<!-- MODAL DE CONFIRMAÇÃO -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('confirmOverlay')">✕</button>
+    <div class="modal-icon">⚡</div>
+    <h3>Pronto para disparar?</h3>
+    <p>O Outlook vai abrir com tudo já preenchido e as métricas de envio destes contatos serão atualizadas. Confira antes:</p>
+    <ul id="confirmSummary"></ul>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('confirmOverlay')">Revisar</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmSend()">Registrar & Abrir Outlook</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PÓS-ENVIO -->
+<div class="overlay" id="afterOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('afterOverlay')">✕</button>
+    <div class="modal-icon">📮</div>
+    <h3>Outlook aberto!</h3>
+    <p>As contagens de envio foram atualizadas com sucesso. Falta só 1 passo no Outlook:</p>
+    <ul>
+      <li>Confira os destinatários e clique em <b style="color:#fff">Enviar</b>.</li>
+    </ul>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-block" onclick="closeModal('afterOverlay')">Entendi</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // contact structure: { email: string, selected: boolean, sendCount: number, lastSent: string (ISO) }
+  let contacts = [];
+  let addMode = 'single';
+  let sendMode = 'desktop';
+
+  // Load from LocalStorage
+  function loadData() {
+    const saved = localStorage.getItem('flashemail_data_v2');
+    if(saved){
+      try {
+        contacts = JSON.parse(saved);
+        // Ensure default properties for old data compatibility
+        contacts.forEach(c => {
+          if (c.sendCount === undefined) c.sendCount = 0;
+          if (c.lastSent === undefined) c.lastSent = null;
+        });
+      } catch(e) {
+        console.error("Erro ao carregar dados", e);
+        contacts = [];
+      }
+    }
+    renderContacts();
+  }
+
+  // Save to LocalStorage
+  function saveData() {
+    localStorage.setItem('flashemail_data_v2', JSON.stringify(contacts));
+  }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 2200);
+  }
+
+  function isValidEmail(v){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  }
+
+  function setAddMode(mode){
+    addMode = mode;
+    document.getElementById('tabSingle').classList.toggle('active', mode==='single');
+    document.getElementById('tabBulk').classList.toggle('active', mode==='bulk');
+    document.getElementById('singleAdd').style.display = mode==='single' ? 'block':'none';
+    document.getElementById('bulkAdd').classList.toggle('show', mode==='bulk');
+  }
+
+  function addSingleEmail(){
+    const input = document.getElementById('singleEmailInput');
+    const val = input.value.trim();
+    if(!val) return;
+    if(!isValidEmail(val)){ showToast('E-mail inválido: ' + val); return; }
+    addEmailToList(val);
+    input.value = '';
+    input.focus();
+  }
+  document.getElementById('singleEmailInput').addEventListener('keydown', e=>{
+    if(e.key === 'Enter'){ e.preventDefault(); addSingleEmail(); }
+  });
+
+  function addBulkEmails(){
+    const raw = document.getElementById('bulkEmailInput').value;
+    const parts = raw.split(/[,;\n]/).map(s=>s.trim()).filter(Boolean);
+    let added = 0, invalid = 0;
+    parts.forEach(p=>{
+      if(isValidEmail(p)){ 
+        if(addEmailToList(p, false)) added++; 
+      }
+      else invalid++;
+    });
+    saveData();
+    renderContacts();
+    document.getElementById('bulkEmailInput').value = '';
+    if(added) showToast(added + ' e-mail(s) adicionados' + (invalid ? ` · ${invalid} inválido(s)`:''));
+    else showToast('Nenhum e-mail válido encontrado');
+  }
+
+  function addEmailToList(email, triggerRender = true){
+    email = email.toLowerCase();
+    if(contacts.some(c=>c.email === email)){ 
+      if(triggerRender) showToast('Já cadastrado: ' + email); 
+      return false; 
+    }
+    contacts.unshift({ email, selected: true, sendCount: 0, lastSent: null }); // Add to top
+    if(triggerRender) {
+      saveData();
+      renderContacts();
+    }
+    return true;
+  }
+
+  function removeContact(email){
+    contacts = contacts.filter(c=>c.email !== email);
+    saveData();
+    renderContacts();
+  }
+
+  function toggleContact(email){
+    const c = contacts.find(c=>c.email===email);
+    if(c) c.selected = !c.selected;
+    saveData();
+    renderContacts();
+  }
+
+  function selectAll(state){
+    contacts.forEach(c=>c.selected = state);
+    saveData();
+    renderContacts();
+  }
+
+  function selectUnsent(){
+    contacts.forEach(c => { c.selected = (c.sendCount === 0); });
+    saveData();
+    renderContacts();
+    showToast('Filtro: Apenas nunca enviados');
+  }
+
+  function selectSent(){
+    contacts.forEach(c => { c.selected = (c.sendCount > 0); });
+    saveData();
+    renderContacts();
+    showToast('Filtro: Apenas já enviados');
+  }
+
+  function resetAnalytics(){
+    contacts.forEach(c => {
+      c.sendCount = 0;
+      c.lastSent = null;
+    });
+    saveData();
+    renderContacts();
+    showToast('Métricas zeradas com sucesso');
+  }
+
+  function formatDate(isoString) {
+    if (!isoString) return '';
+    const d = new Date(isoString);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')} às ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+  }
+
+  function renderContacts(){
+    const list = document.getElementById('chipList');
+    
+    // Update Panel Badges
+    document.getElementById('countBadge').textContent = contacts.length + ' cadastrados';
+    const selectedCount = contacts.filter(c=>c.selected).length;
+    document.getElementById('selectedBadge').textContent = selectedCount + ' selecionados';
+
+    // Update Intelligence Dashboard
+    let totalSends = 0;
+    let unsentCount = 0;
+    contacts.forEach(c => {
+      totalSends += c.sendCount;
+      if (c.sendCount === 0) unsentCount++;
+    });
+    document.getElementById('statTotalSends').textContent = totalSends;
+    document.getElementById('statUnsent').textContent = unsentCount;
+
+    // Render List
+    if(contacts.length === 0){
+      list.innerHTML = '<div class="empty-state">Nenhum e-mail cadastrado ainda.<br>Adicione o primeiro acima ⚡</div>';
+      return;
+    }
+    
+    list.innerHTML = contacts.map(c => {
+      const badgeClass = c.sendCount > 0 ? 'badge-sent' : 'badge-none';
+      const badgeText = c.sendCount > 0 ? `${c.sendCount} envio(s)` : '0 envios';
+      const dateText = c.lastSent ? ` · últ: ${formatDate(c.lastSent)}` : '';
+      
+      return `
+      <div class="chip ${c.selected ? 'selected':''}">
+        <input type="checkbox" ${c.selected?'checked':''} onchange="toggleContact('${c.email.replace(/'/g,"\\'")}')">
+        <div class="chip-content">
+          <div class="chip-email">${c.email}</div>
+          <div class="chip-meta">
+            <span class="${badgeClass}">${badgeText}</span>
+            <span>${dateText}</span>
+          </div>
+        </div>
+        <button class="chip-remove" onclick="removeContact('${c.email.replace(/'/g,"\\'")}')">✕</button>
+      </div>
+    `}).join('');
+  }
+
+  document.getElementById('bodyInput').addEventListener('input', function(){
+    document.getElementById('charCount').textContent = this.value.length + ' caracteres';
+  });
+
+  function setSendMode(mode){
+    sendMode = mode;
+    document.getElementById('modeDesktop').classList.toggle('active', mode==='desktop');
+    document.getElementById('modeWeb').classList.toggle('active', mode==='web');
+  }
+
+  function getSelectedEmails(){
+    return contacts.filter(c=>c.selected).map(c=>c.email);
+  }
+
+  function openSendModal(){
+    const selected = getSelectedEmails();
+    if(selected.length === 0){ showToast('Selecione ao menos um destinatário'); return; }
+    const subject = document.getElementById('subjectInput').value.trim();
+    if(!subject) { showToast('Adicione um assunto'); return; }
+
+    const summary = document.getElementById('confirmSummary');
+    summary.innerHTML = `
+      <li>${selected.length} destinatário(s) — modo ${sendMode === 'desktop' ? 'App/Desktop' : 'Outlook Web'}</li>
+      <li>Assunto: "${subject}"</li>
+      <li>Métricas: O sistema computará +1 envio para os ${selected.length} contatos selecionados.</li>
+    `;
+    document.getElementById('confirmOverlay').classList.add('show');
+  }
+
+  function closeModal(id){
+    document.getElementById(id).classList.remove('show');
+  }
+
+  function confirmSend(){
+    const selected = getSelectedEmails();
+    const subject = document.getElementById('subjectInput').value.trim();
+    const body = document.getElementById('bodyInput').value;
+
+    if(selected.length > 45){
+      showToast('Muitos destinatários para um link só — envie em lotes menores (até ~45).');
+    }
+
+    // UPDATE INTELLIGENCE/ANALYTICS
+    const now = new Date().toISOString();
+    contacts.forEach(c => {
+      if(c.selected) {
+        c.sendCount += 1;
+        c.lastSent = now;
+        c.selected = false; // Deselect after sending to avoid accidental duplicate sends
+      }
+    });
+    saveData();
+    renderContacts();
+
+    // OPEN OUTLOOK
+    if(sendMode === 'desktop'){
+      const url = `mailto:?bcc=${encodeURIComponent(selected.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = url;
+    } else {
+      const url = `https://outlook.office.com/mail/deeplink/compose?bcc=${encodeURIComponent(selected.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(url, '_blank');
+    }
+
+    closeModal('confirmOverlay');
+    setTimeout(()=> document.getElementById('afterOverlay').classList.add('show'), 400);
+  }
+
+  // Init
+  loadData();
+</script>
+
+</body>
+</html>
