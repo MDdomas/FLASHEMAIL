@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Flashemail v3.4 — App Mobile & Safe Queue</title>
+<title>Flashemail v3.5 — Correção CCO, Sessão & Confirmação</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -81,7 +81,6 @@
   h1 .accent{ color:var(--red); }
   .hero p{ margin-top:12px; color:var(--gray); font-size:14px; max-width:560px; }
 
-  /* Navegação por Abas Principais */
   .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 12px; overflow-x: auto; }
   .nav-tab { background: var(--black-2); border: 1px solid var(--line); color: var(--gray); padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
   .nav-tab.active { background: rgba(255,30,45,.1); border-color: var(--red); color: var(--white); }
@@ -116,7 +115,7 @@
   input[type=text], input[type=email], input[type=password], input[type=number], textarea, select{
     width:100%; background:var(--black); border:1px solid var(--line);
     color:var(--white); border-radius:10px; padding:12px 14px;
-    font-family:'Space Grotesk', sans-serif; font-size:16px; /* 16px evita zoom indesejado no iOS */
+    font-family:'Space Grotesk', sans-serif; font-size:16px;
     transition:border-color .15s, box-shadow .15s;
   }
   select { appearance: none; cursor: pointer; }
@@ -203,14 +202,12 @@
   }
   .mass-send-box.show { display:block; }
 
-  /* Tabela de Histórico de Inteligência */
   .history-table-wrapper { width: 100%; overflow-x: auto; margin-top: 12px; max-height: 400px; overflow-y: auto; }
   .history-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; font-family: 'Space Grotesk', sans-serif; min-width: 500px; }
   .history-table th { background: var(--black); color: var(--gray); font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; padding: 10px; border-bottom: 1px solid var(--line); position: sticky; top: 0; }
   .history-table td { padding: 10px; border-bottom: 1px solid var(--line); color: var(--white); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
   .history-table tr:hover { background: rgba(255,255,255,0.02); }
 
-  /* Overlay de Login / Cadastro */
   .overlay{
     position:fixed; inset:0; background:rgba(6,6,7,.92); backdrop-filter:blur(6px);
     display:none; align-items:center; justify-content:center; z-index:100; padding:16px;
@@ -245,7 +242,7 @@
 </head>
 <body>
 
-<!-- TELA DE LOGIN / CADASTRO SEPARADOS -->
+<!-- TELA DE LOGIN / CADASTRO -->
 <div class="overlay show" id="loginOverlay" style="z-index: 999;">
   <div class="modal login-box">
     <div class="brand-mark" style="margin: 0 auto 12px; width:38px; height:38px;">
@@ -273,13 +270,26 @@
   </div>
 </div>
 
+<!-- MODAL DE CONFIRMAÇÃO DE ENVIO REALIZADO NO OUTLOOK -->
+<div class="overlay" id="sendConfirmModal" style="z-index: 1000;">
+  <div class="modal" style="text-align:center;">
+    <div style="font-size: 28px; margin-bottom: 8px;">📬</div>
+    <h3>Confirmação de Disparo</h3>
+    <p>O Outlook foi aberto. O e-mail foi <b>efetivamente enviado</b> lá para registrar no histórico e atualizar os contadores?</p>
+    <div style="display: flex; gap: 8px; margin-top: 16px;">
+      <button class="btn btn-ghost btn-block" onclick="cancelConfirmSend()">Não / Cancelar</button>
+      <button class="btn btn-primary btn-block" onclick="confirmSendAction()">Sim, Enviado!</button>
+    </div>
+  </div>
+</div>
+
 <header>
   <div class="brand">
     <div class="brand-mark">
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 L4 14 H11 L10 22 L20 9 H12.5 L13 2Z" fill="#ff1e2d"/></svg>
     </div>
     <div class="brand-name">flash<span>email</span></div>
-    <div class="brand-tag">v3.4</div>
+    <div class="brand-tag">v3.5</div>
   </div>
   <div class="user-profile" id="userProfile" style="display:none;">
     <span id="userNameDisplay">Usuário</span>
@@ -295,13 +305,11 @@
     <p>Organize suas listas personalizadas, proteja contra bloqueios e acompanhe métricas de disparos.</p>
   </section>
 
-  <!-- Abas de Navegação Principal -->
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="switchView('campanha')">⚡ Campanhas & Disparos</button>
     <button class="nav-tab" onclick="switchView('inteligencia')">📊 Inteligência & Histórico</button>
   </div>
 
-  <!-- SEÇÃO 1: CAMPANHAS E DISPAROS -->
   <div class="view-section active" id="viewCampanha">
     <div class="grid">
       <div class="panel">
@@ -310,7 +318,6 @@
           <div class="panel-count" id="countBadge">0 cadastrados</div>
         </div>
 
-        <!-- Gerenciamento de Grupos (Criar e Apagar) -->
         <div class="intelligence-box">
           <div class="intel-header">
             <span>Gerenciar Grupos</span>
@@ -319,15 +326,11 @@
             <input type="text" id="newGroupNameInput" placeholder="Nome do novo grupo...">
             <button class="btn btn-primary btn-sm" onclick="createNewGroup()">+ Criar</button>
           </div>
-          <div class="group-manage-list" id="groupManageList">
-            <!-- Renderizado dinamicamente -->
-          </div>
+          <div class="group-manage-list" id="groupManageList"></div>
         </div>
 
         <label class="field-label">Filtrar por Grupo:</label>
-        <div class="intel-actions" id="groupFilters">
-          <!-- Renderizado Dinamicamente -->
-        </div>
+        <div class="intel-actions" id="groupFilters"></div>
 
         <div class="toggle-row">
           <button class="active" id="tabSingle" onclick="setAddMode('single')">Adicionar um a um</button>
@@ -335,9 +338,7 @@
         </div>
 
         <label class="field-label">Salvar no Grupo:</label>
-        <select id="addGroupSelect">
-          <!-- Renderizado Dinamicamente com Sem Grupo -->
-        </select>
+        <select id="addGroupSelect"></select>
 
         <div id="singleAdd" style="margin-top:8px;">
           <label class="field-label">Endereço de e-mail do contato</label>
@@ -370,9 +371,7 @@
         </div>
 
         <label class="field-label" style="color:var(--blue);">Carregar Template do Grupo:</label>
-        <select id="composerGroupSelect" onchange="loadGroupTemplate()">
-          <!-- Renderizado Dinamicamente -->
-        </select>
+        <select id="composerGroupSelect" onchange="loadGroupTemplate()"></select>
 
         <label class="field-label" style="margin-top:8px;">Assunto</label>
         <div class="input-row">
@@ -382,7 +381,6 @@
         <label class="field-label">Corpo da mensagem</label>
         <textarea id="bodyInput" style="min-height:140px" placeholder="Escreva sua mensagem..." oninput="saveGroupTemplate()"></textarea>
 
-        <!-- Opção de envio em massa para 1 email (Fila controlada com limite de 10) -->
         <div class="mass-send-box" id="massSendBox">
           <label class="field-label" style="color:var(--red);">🔥 Envio em Massa (Fila Controlada - 1 Contato)</label>
           <p style="font-size:11px; color:var(--gray); margin-bottom:6px;">Apenas 1 contato selecionado. Quantas vezes deseja enviar? (Máx. 10 seguro)</p>
@@ -408,14 +406,13 @@
     </div>
   </div>
 
-  <!-- SEÇÃO 2: INTELIGÊNCIA & HISTÓRICO -->
   <div class="view-section" id="viewInteligencia">
     <div class="panel">
       <div class="panel-head">
         <div class="panel-title">Métricas & Histórico de Disparos</div>
         <div class="panel-count" id="historyCountBadge">0 registros</div>
       </div>
-      <p style="color:var(--gray); font-size:12px; margin-bottom:12px;">Visualize abaixo todos os e-mails disparados, separados por grupo, endereço e data de envio.</p>
+      <p style="color:var(--gray); font-size:12px; margin-bottom:12px;">Visualize abaixo todos os e-mails disparados com confirmação, separados por grupo, endereço e data de envio.</p>
       
       <div class="history-table-wrapper">
         <table class="history-table">
@@ -438,15 +435,23 @@
 </main>
 
 <footer>
-  <b>Flashemail v3.4</b> — Mobile App View, CCO Automático e Fila Controlada.
+  <b>Flashemail v3.5</b> — CCO Separado Corretamente, Sessão Persistida e Confirmação de Envio.
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  /* ====== AUTHENTICATION & LOGIN/REGISTER MODES ====== */
   let currentUser = null;
   let currentAuthMode = 'login';
+  let pendingSendPayload = null; // Guarda dados para confirmar após o envio real
+
+  // Verifica login salvo ao carregar a página
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedUser = localStorage.getItem('flashemail_current_user');
+    if(savedUser) {
+      loginSuccess(savedUser, true);
+    }
+  });
 
   function setAuthMode(mode) {
     currentAuthMode = mode;
@@ -491,11 +496,12 @@
       showToast('Cadastro realizado com sucesso!');
     }
 
-    loginSuccess(emailInput);
+    loginSuccess(emailInput, false);
   }
 
-  function loginSuccess(email) {
+  function loginSuccess(email, isRestoring) {
     currentUser = email;
+    localStorage.setItem('flashemail_current_user', email);
     document.getElementById('loginOverlay').classList.remove('show');
     document.getElementById('userProfile').style.display = 'flex';
     document.getElementById('userNameDisplay').textContent = email;
@@ -503,10 +509,12 @@
     
     loadData();
     restoreLastInfo();
+    if(!isRestoring) showToast(`Bem-vindo, ${email}!`);
   }
 
   function logout() {
     currentUser = null;
+    localStorage.removeItem('flashemail_current_user');
     document.getElementById('loginOverlay').classList.add('show');
     document.getElementById('userProfile').style.display = 'none';
     document.getElementById('authPassword').value = '';
@@ -516,7 +524,6 @@
     renderAll();
   }
 
-  /* ====== APP LOGIC ====== */
   let contacts = [];
   let groups = [];
   let historyLog = [];
@@ -528,7 +535,7 @@
 
   function loadData() {
     if(!currentUser) return;
-    const keyPrefix = `flashemail_v34_${currentUser}`;
+    const keyPrefix = `flashemail_v35_${currentUser}`;
     
     const savedGroups = localStorage.getItem(`${keyPrefix}_groups`);
     groups = savedGroups ? JSON.parse(savedGroups) : [];
@@ -547,7 +554,7 @@
 
   function saveData() {
     if(!currentUser) return;
-    const keyPrefix = `flashemail_v34_${currentUser}`;
+    const keyPrefix = `flashemail_v35_${currentUser}`;
     localStorage.setItem(`${keyPrefix}_groups`, JSON.stringify(groups));
     localStorage.setItem(`${keyPrefix}_contacts`, JSON.stringify(contacts));
     localStorage.setItem(`${keyPrefix}_templates`, JSON.stringify(templates));
@@ -557,7 +564,7 @@
 
   function restoreLastInfo() {
     if(!currentUser) return;
-    const savedLast = localStorage.getItem(`flashemail_v34_${currentUser}_lastInfo`);
+    const savedLast = localStorage.getItem(`flashemail_v35_${currentUser}_lastInfo`);
     if(savedLast) {
       lastInfo = JSON.parse(savedLast);
       document.getElementById('singleEmailInput').value = lastInfo.email || '';
@@ -598,12 +605,10 @@
       showToast('Digite um nome para o grupo.');
       return;
     }
-
     if(groupName.toLowerCase() === 'sem grupo') {
       showToast('Nome reservado.');
       return;
     }
-
     if(groups.map(g=>g.toLowerCase()).includes(groupName.toLowerCase())) {
       showToast('Este grupo já existe.');
       return;
@@ -700,7 +705,6 @@
   function filterByGroup(group) {
     currentGroupFilter = group;
     renderGroupFilters();
-    
     if (group !== 'todos') {
       document.getElementById('composerGroupSelect').value = group;
       loadGroupTemplate();
@@ -807,13 +811,11 @@
 
   function renderContacts(){
     const list = document.getElementById('chipList');
-    
     const filtered = currentGroupFilter === 'todos' 
       ? contacts 
       : contacts.filter(c => c.group === currentGroupFilter);
 
     document.getElementById('countBadge').textContent = contacts.length + ' total';
-    
     const selectedCount = contacts.filter(c=>c.selected).length;
     document.getElementById('selectedBadge').textContent = selectedCount + ' selecionados';
 
@@ -845,7 +847,7 @@
     document.getElementById('modeWeb').classList.toggle('active', mode==='web');
   }
 
-  /* ====== LÓGICA DE ENVIO INTELIGENTE (OPÇÃO 1 CCO / OPÇÃO 2 FILA CONTROLADA) ====== */
+  /* ====== GERAÇÃO E CONFIRMAÇÃO DE ENVIO ====== */
   function prepareSend(){
     const selected = contacts.filter(c => c.selected);
     if(selected.length === 0){ 
@@ -862,78 +864,74 @@
       return; 
     }
 
-    const nowTimestamp = new Date().toLocaleString('pt-BR');
+    // Prepara o payload para ser executado e confirmado
+    pendingSendPayload = {
+      selected,
+      subject,
+      body,
+      composerGroup
+    };
 
-    // CASO 2: Apenas 1 endereço selecionado E lote maior que 1 -> Opção 2 (Fila Controlada no "Para:")
+    // 1. CASO DE 1 CONTATO SELECIONADO E LOTE > 1 (Fila Controlada)
     if(selected.length === 1) {
       let times = parseInt(document.getElementById('massSendCount').value) || 1;
-      
-      // Limite máximo seguro por lote para evitar bloqueio e travamento
-      if (times > 10) {
-        times = 10;
-        showToast('O limite seguro por lote é de até 10 envios.');
-      }
+      if (times > 10) times = 10;
       
       if(times > 1) {
         showToast(`Iniciando fila controlada (${times} disparos)...`);
         let delay = 0;
-
         for(let i = 0; i < times; i++) {
           setTimeout(() => {
             const url = sendMode === 'desktop'
               ? `mailto:${encodeURIComponent(selected[0].email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
               : `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(selected[0].email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            
             window.open(url, '_blank');
-            
-            selected[0].sendCount += 1;
-            historyLog.unshift({
-              date: nowTimestamp,
-              email: selected[0].email,
-              group: selected[0].group || composerGroup,
-              subject: subject
-            });
-
-            saveData();
-            renderContacts();
           }, delay);
-          delay += 1500; // Intervalo seguro de 1.5s entre cada aba
+          delay += 1500;
         }
-        selected[0].selected = false;
-        saveData();
-        renderContacts();
+        // Exibe modal de confirmação para validar se o disparo ocorreu
+        document.getElementById('sendConfirmModal').classList.add('show');
         return;
       }
     }
 
-    // CASO ÚNICO SIMPLES (1 selecionado, lote 1)
+    // 2. CASO DE 1 CONTATO SIMPLES (Lote 1)
     if(selected.length === 1) {
       const url = sendMode === 'desktop'
         ? `mailto:${encodeURIComponent(selected[0].email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
         : `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(selected[0].email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       
       window.open(url, '_blank');
-      selected[0].sendCount += 1;
-      historyLog.unshift({
-        date: nowTimestamp,
-        email: selected[0].email,
-        group: selected[0].group || composerGroup,
-        subject: subject
-      });
-      selected[0].selected = false;
-      saveData();
-      renderContacts();
-      showToast('Aba de envio aberta com sucesso!');
+      document.getElementById('sendConfirmModal').classList.add('show');
       return;
     }
 
-    // CASO 1: Múltiplos contatos selecionados (Envio de Grupo) -> Opção 1 (CCO unificado em aba única)
-    const emailsList = selected.map(c => c.email).join(';');
+    // 3. CASO DE MÚLTIPLOS CONTATOS -> CORREÇÃO DO CCO (BCC)
+    // Cada e-mail é codificado separadamente e unido por ponto e vírgula sem codificar o separador
+    const encodedEmailsList = selected.map(c => encodeURIComponent(c.email)).join(';');
+
     const url = sendMode === 'desktop'
-      ? `mailto:?bcc=${encodeURIComponent(emailsList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-      : `https://outlook.office.com/mail/deeplink/compose?bcc=${encodeURIComponent(emailsList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      ? `mailto:?bcc=${encodedEmailsList}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+      : `https://outlook.office.com/mail/deeplink/compose?bcc=${encodedEmailsList}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     window.open(url, '_blank');
+    document.getElementById('sendConfirmModal').classList.add('show');
+  }
+
+  function cancelConfirmSend() {
+    pendingSendPayload = null;
+    document.getElementById('sendConfirmModal').classList.remove('show');
+    showToast('Disparo cancelado. Nenhum histórico foi computado.');
+  }
+
+  function confirmSendAction() {
+    if(!pendingSendPayload) {
+      document.getElementById('sendConfirmModal').classList.remove('show');
+      return;
+    }
+
+    const { selected, subject, body, composerGroup } = pendingSendPayload;
+    const nowTimestamp = new Date().toLocaleString('pt-BR');
 
     selected.forEach(c => {
       c.sendCount += 1;
@@ -948,7 +946,9 @@
 
     saveData();
     renderContacts();
-    showToast('Aba de disparo em grupo (CCO) aberta com sucesso!');
+    pendingSendPayload = null;
+    document.getElementById('sendConfirmModal').classList.remove('show');
+    showToast('Disparo confirmado e registrado com sucesso!');
   }
 
   function renderHistoryTable() {
@@ -966,7 +966,7 @@
         <td>${h.email}</td>
         <td><span class="badge-group">${h.group}</span></td>
         <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${h.subject}</td>
-        <td><span class="badge-sent">Disparado</span></td>
+        <td><span class="badge-sent">Confirmado</span></td>
       </tr>
     `).join('');
   }
