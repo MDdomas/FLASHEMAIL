@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Flashemail v3.5 — Correção CCO, Sessão & Confirmação</title>
+<title>Flashemail v4.0 — Prático & Automatizado</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -62,10 +62,23 @@
     border:1px solid var(--line); padding:2px 6px; border-radius:20px; letter-spacing:.04em;
   }
   
-  .user-profile { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; }
-  .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--red-dim); color:var(--white); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold;}
+  /* Perfil de usuário discreto (e-mail oculto até clicar) */
+  .user-profile-wrapper { position: relative; }
+  .user-avatar { 
+    width: 32px; height: 32px; border-radius: 50%; background: var(--red-dim); color:var(--white); 
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; cursor:pointer;
+    border: 1px solid var(--red); transition: transform 0.15s;
+  }
+  .user-avatar:hover { transform: scale(1.05); }
+  .user-dropdown {
+    position: absolute; right: 0; top: 40px; background: var(--black-2); border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px; width: 220px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: none; z-index: 50; text-align: left;
+  }
+  .user-dropdown.show { display: block; }
+  .user-dropdown-email { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--gray); margin-bottom: 8px; word-break: break-all; }
 
-  main{ max-width:1180px; margin:0 auto; padding:30px 4vw 80px; width:100%; }
+  main{ max-width:900px; margin:0 auto; padding:30px 4vw 80px; width:100%; }
 
   .hero{ margin-bottom:24px; }
   .eyebrow{
@@ -75,52 +88,38 @@
   }
   .eyebrow::before{ content:''; width:18px; height:1px; background:var(--red); }
   h1{
-    font-family:'Archivo Black', sans-serif; font-size:clamp(28px, 4.5vw, 48px);
+    font-family:'Archivo Black', sans-serif; font-size:clamp(24px, 4vw, 40px);
     line-height:1.05; letter-spacing:-0.02em; max-width:820px;
   }
   h1 .accent{ color:var(--red); }
-  .hero p{ margin-top:12px; color:var(--gray); font-size:14px; max-width:560px; }
-
-  .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 12px; overflow-x: auto; }
-  .nav-tab { background: var(--black-2); border: 1px solid var(--line); color: var(--gray); padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-  .nav-tab.active { background: rgba(255,30,45,.1); border-color: var(--red); color: var(--white); }
-
-  .view-section { display: none; }
-  .view-section.active { display: block; }
-
-  .grid{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; }
-  @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
 
   .panel{
     background:linear-gradient(180deg, var(--black-2), var(--black-3) 140%);
-    border:1px solid var(--line); border-radius:16px; padding:20px; position:relative;
+    border:1px solid var(--line); border-radius:16px; padding:24px; position:relative; margin-bottom:24px;
   }
   .panel::before{
     content:''; position:absolute; top:0; left:20px; right:20px; height:1px;
     background:linear-gradient(90deg, transparent, var(--red), transparent); opacity:.5;
   }
   .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
-  .panel-title{ font-family:'Archivo Black', sans-serif; font-size:15px; letter-spacing:-0.01em;}
-  .panel-count{
-    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--red);
-    background:rgba(255,30,45,.1); border:1px solid var(--red-dim); padding:2px 8px; border-radius:20px;
-  }
+  .panel-title{ font-family:'Archivo Black', sans-serif; font-size:16px; letter-spacing:-0.01em;}
+  .panel-subtitle { font-family:'Archivo Black', sans-serif; font-size:14px; margin: 30px 0 16px; color: var(--white); display: flex; align-items: center; gap: 8px; }
 
   label.field-label{
     display:block; font-family:'JetBrains Mono', monospace; font-size:11px;
     color:var(--gray); letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px;
   }
 
-  .input-row{ display:flex; gap:8px; margin-bottom:10px; }
-  input[type=text], input[type=email], input[type=password], input[type=number], textarea, select{
+  .input-row{ display:flex; gap:8px; margin-bottom:12px; }
+  input[type=text], input[type=email], input[type=password], input[type=datetime-local], textarea, select{
     width:100%; background:var(--black); border:1px solid var(--line);
     color:var(--white); border-radius:10px; padding:12px 14px;
-    font-family:'Space Grotesk', sans-serif; font-size:16px;
+    font-family:'Space Grotesk', sans-serif; font-size:15px;
     transition:border-color .15s, box-shadow .15s;
   }
   select { appearance: none; cursor: pointer; }
   input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px rgba(255,30,45,.15); }
-  textarea{ resize:vertical; min-height:70px; }
+  textarea{ resize:vertical; min-height:110px; }
 
   button{ font-family:'Space Grotesk', sans-serif; cursor:pointer; border:none; }
 
@@ -137,77 +136,23 @@
   .btn-block{ width:100%; }
   .btn-sm{ padding:6px 10px; font-size:11px; border-radius:8px; }
 
-  .intelligence-box{ background: rgba(59, 130, 246, 0.05); border: 1px solid var(--blue-dim); border-radius: 12px; padding: 14px; margin-bottom: 16px; }
-  .intel-header{ display: flex; align-items: center; justify-content:space-between; font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 10px; }
-  .intel-actions{ display: flex; gap: 6px; flex-wrap: wrap; margin-bottom:12px; max-height: 90px; overflow-y: auto; }
-  .btn-intel{ background: transparent; border: 1px solid var(--line); color: var(--gray); font-size: 11px; padding: 5px 8px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; }
-  .btn-intel:hover, .btn-intel.active{ border-color: var(--blue); color: var(--blue); background:rgba(59,130,246,0.1); }
+  /* Seção de Modelos */
+  .template-box { background: rgba(59, 130, 246, 0.05); border: 1px solid var(--blue-dim); border-radius: 12px; padding: 14px; margin-bottom: 20px; }
+  .template-row { display: flex; gap: 8px; margin-top: 8px; }
 
-  .group-manage-list { display: flex; flex-direction: column; gap: 6px; max-height: 110px; overflow-y: auto; margin-bottom: 12px; }
-  .group-manage-item { display: flex; align-items: center; justify-content: space-between; background: var(--black); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); font-size: 11px; }
-  .group-manage-item span { font-family: 'JetBrains Mono', monospace; }
+  /* Configuração de Webmail no PC */
+  .webmail-selector { display: flex; gap: 8px; margin-bottom: 16px; background: var(--black); padding: 8px; border-radius: 10px; border: 1px solid var(--line); }
+  .webmail-btn { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--gray); padding: 8px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .webmail-btn.active { background: rgba(59,130,246,0.15); border-color: var(--blue); color: var(--blue); }
 
-  .toggle-row{ display:flex; gap:8px; margin-bottom:14px; }
-  .toggle-row button{
-    flex:1; padding:8px; border-radius:8px; font-size:11px; font-weight:600;
-    background:var(--black); border:1px solid var(--line); color:var(--gray);
-  }
-  .toggle-row button.active{ background:rgba(255,30,45,.12); border-color:var(--red); color:var(--white); }
-
-  .bulk-area{ display:none; margin-bottom:12px; }
-  .bulk-area.show{ display:block; }
-
-  .chip-list{ display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto; margin-top:4px; padding-right:2px; }
-  .chip{
-    display:flex; align-items:center; gap:10px; background:var(--black); border:1px solid var(--line);
-    border-radius:10px; padding:10px 12px; transition: border-color 0.2s, background 0.2s;
-  }
-  .chip.selected{ border-color:var(--red-dim); background:rgba(255,30,45,.06); }
-  .chip input[type=checkbox]{
-    appearance:none; width:18px; height:18px; min-width:18px;
-    border:1.5px solid var(--gray); border-radius:5px; cursor:pointer;
-    display:grid; place-content:center; background:var(--black);
-  }
-  .chip input[type=checkbox]:checked{ background:var(--red); border-color:var(--red); }
-  .chip input[type=checkbox]:checked::after{
-    content:''; width:5px; height:9px; border:solid #0a0a0c; border-width:0 2px 2px 0;
-    transform:rotate(45deg) translate(-1px,-1px);
-  }
-  .chip-content{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-  .chip-email{ font-size:12px; font-family:'JetBrains Mono', monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .chip-meta{ display: flex; gap: 8px; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--gray); }
-  
-  .badge-group{ color: var(--white); background: var(--line); padding: 1px 6px; border-radius: 4px; }
-  .badge-sent{ color: var(--blue); background: rgba(59, 130, 246, 0.15); padding: 1px 6px; border-radius: 4px; }
-  
-  .chip-remove{ background:none; color:var(--gray); font-size:15px; line-height:1; padding:2px 6px; border-radius:6px; }
-  .chip-remove:hover{ color:var(--red); background:rgba(255,30,45,.1); }
-  
-  .empty-state{ text-align:center; padding:30px 10px; color:var(--gray); font-size:12px; border:1px dashed var(--line); border-radius:12px; }
-
-  .select-actions{ display:flex; gap:6px; margin:12px 0 6px; flex-wrap: wrap; }
-
-  .send-modes{ display:flex; gap:8px; margin-top:16px; }
-  .send-mode{
-    flex:1; text-align:left; padding:12px; border-radius:10px;
-    background:var(--black); border:1px solid var(--line); color:var(--white);
-  }
-  .send-mode b{ display:block; font-size:12px; margin-bottom:2px; }
-  .send-mode span{ font-size:10px; color:var(--gray); font-family:'JetBrains Mono', monospace; }
-  .send-mode.active{ border-color:var(--red); background:rgba(255,30,45,.08); }
-
-  .mass-send-box {
-      display:none; background:rgba(255,30,45,.05); border:1px solid var(--red-dim); 
-      padding:12px; border-radius:10px; margin-top:14px;
-  }
-  .mass-send-box.show { display:block; }
-
-  .history-table-wrapper { width: 100%; overflow-x: auto; margin-top: 12px; max-height: 400px; overflow-y: auto; }
-  .history-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; font-family: 'Space Grotesk', sans-serif; min-width: 500px; }
+  /* Histórico Tabela */
+  .history-table-wrapper { width: 100%; overflow-x: auto; margin-top: 12px; max-height: 300px; overflow-y: auto; }
+  .history-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; font-family: 'Space Grotesk', sans-serif; min-width: 450px; }
   .history-table th { background: var(--black); color: var(--gray); font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; padding: 10px; border-bottom: 1px solid var(--line); position: sticky; top: 0; }
   .history-table td { padding: 10px; border-bottom: 1px solid var(--line); color: var(--white); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
   .history-table tr:hover { background: rgba(255,255,255,0.02); }
 
+  /* Overlays e Modais */
   .overlay{
     position:fixed; inset:0; background:rgba(6,6,7,.92); backdrop-filter:blur(6px);
     display:none; align-items:center; justify-content:center; z-index:100; padding:16px;
@@ -217,15 +162,11 @@
     width:100%; max-width:380px; background:var(--black-2); border:1px solid var(--line);
     border-radius:16px; padding:24px; position:relative;
     box-shadow:0 30px 80px rgba(0,0,0,.6);
-    animation:pop .18s ease;
+    animation:pop .18s ease; text-align: center;
   }
   @keyframes pop{ from{ transform:scale(.92); opacity:0;} to{ transform:scale(1); opacity:1;} }
   .modal h3{ font-family:'Archivo Black', sans-serif; font-size:18px; margin-bottom:8px;}
   .modal p{ color:var(--gray); font-size:13px; line-height:1.5; margin-bottom:14px; }
-  
-  .auth-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-  .auth-tab { flex: 1; padding: 8px; background: var(--black); border: 1px solid var(--line); color: var(--gray); border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; }
-  .auth-tab.active { background: rgba(255,30,45,.1); border-color: var(--red); color: var(--white); }
 
   .login-box { text-align:left; }
   .login-box h2 { font-family:'Archivo Black'; font-size:18px; margin-bottom:4px; }
@@ -242,43 +183,36 @@
 </head>
 <body>
 
-<!-- TELA DE LOGIN / CADASTRO -->
+<!-- TELA DE LOGIN -->
 <div class="overlay show" id="loginOverlay" style="z-index: 999;">
   <div class="modal login-box">
     <div class="brand-mark" style="margin: 0 auto 12px; width:38px; height:38px;">
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 L4 14 H11 L10 22 L20 9 H12.5 L13 2Z" fill="#ff1e2d"/></svg>
     </div>
-    <h2 style="text-align:center;">Acesso ao Flashemail</h2>
-    <p style="text-align:center;">Entre na sua conta ou crie um novo cadastro.</p>
+    <h2>Acesso ao Flashemail</h2>
+    <p style="text-align:center;">Entre com sua conta para carregar seus modelos.</p>
     
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLoginMode" onclick="setAuthMode('login')">Entrar</button>
-      <button class="auth-tab" id="tabRegisterMode" onclick="setAuthMode('register')">Criar Cadastro</button>
-    </div>
-
     <div style="margin-bottom:10px;">
       <label class="field-label">Seu E-mail</label>
       <input type="email" id="authEmail" placeholder="seuemail@empresa.com">
     </div>
-
     <div style="margin-bottom:18px;">
       <label class="field-label">Senha</label>
       <input type="password" id="authPassword" placeholder="••••••••">
     </div>
-
-    <button class="btn btn-primary btn-block" id="authButtonAction" onclick="handleAuth()">Acessar Conta</button>
+    <button class="btn btn-primary btn-block" onclick="handleLogin()">Acessar Conta</button>
   </div>
 </div>
 
-<!-- MODAL DE CONFIRMAÇÃO DE ENVIO REALIZADO NO OUTLOOK -->
-<div class="overlay" id="sendConfirmModal" style="z-index: 1000;">
-  <div class="modal" style="text-align:center;">
-    <div style="font-size: 28px; margin-bottom: 8px;">📬</div>
-    <h3>Confirmação de Disparo</h3>
-    <p>O Outlook foi aberto. O e-mail foi <b>efetivamente enviado</b> lá para registrar no histórico e atualizar os contadores?</p>
+<!-- MODAL DE ALERTA DE AGENDAMENTO -->
+<div class="overlay" id="schedulerModal" style="z-index: 1000;">
+  <div class="modal">
+    <div style="font-size: 28px; margin-bottom: 8px;">⏰</div>
+    <h3>Hora do Disparo Agendado!</h3>
+    <p id="schedulerModalText">O horário programado para o envio deste modelo chegou.</p>
     <div style="display: flex; gap: 8px; margin-top: 16px;">
-      <button class="btn btn-ghost btn-block" onclick="cancelConfirmSend()">Não / Cancelar</button>
-      <button class="btn btn-primary btn-block" onclick="confirmSendAction()">Sim, Enviado!</button>
+      <button class="btn btn-ghost btn-block" onclick="closeSchedulerModal()">Fechar</button>
+      <button class="btn btn-primary btn-block" onclick="executeScheduledSend()">Enviar Agora</button>
     </div>
   </div>
 </div>
@@ -289,211 +223,173 @@
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 L4 14 H11 L10 22 L20 9 H12.5 L13 2Z" fill="#ff1e2d"/></svg>
     </div>
     <div class="brand-name">flash<span>email</span></div>
-    <div class="brand-tag">v3.5</div>
+    <div class="brand-tag">v4.0</div>
   </div>
-  <div class="user-profile" id="userProfile" style="display:none;">
-    <span id="userNameDisplay">Usuário</span>
-    <div class="user-avatar" id="userAvatarDisplay">U</div>
-    <button class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 6px;" onclick="logout()">Sair</button>
+  
+  <!-- Perfil com e-mail oculto no avatar -->
+  <div class="user-profile-wrapper" id="userProfileWrapper" style="display:none;">
+    <div class="user-avatar" id="userAvatarDisplay" onclick="toggleUserDropdown()" title="Minha Conta">U</div>
+    <div class="user-dropdown" id="userDropdown">
+      <div class="user-dropdown-email" id="userNameDisplay">email@exemplo.com</div>
+      <button class="btn btn-ghost btn-sm btn-block" onclick="logout()">Sair da Conta</button>
+    </div>
   </div>
 </header>
 
 <main>
   <section class="hero">
-    <div class="eyebrow">disparo inteligente em lote</div>
-    <h1>Gerencie grupos, dispare no <span class="accent">Outlook</span> e analise.</h1>
-    <p>Organize suas listas personalizadas, proteja contra bloqueios e acompanhe métricas de disparos.</p>
+    <div class="eyebrow">disparo ágil e prático</div>
+    <h1>Monte, salve modelos e <span class="accent">dispare</span>.</h1>
   </section>
 
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchView('campanha')">⚡ Campanhas & Disparos</button>
-    <button class="nav-tab" onclick="switchView('inteligencia')">📊 Inteligência & Histórico</button>
-  </div>
+  <!-- PAINEL PRINCIPAL DE MENSAGEM E ENVIO -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Editor & Disparo</div>
+    </div>
 
-  <div class="view-section active" id="viewCampanha">
-    <div class="grid">
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title">Contatos & Grupos</div>
-          <div class="panel-count" id="countBadge">0 cadastrados</div>
-        </div>
-
-        <div class="intelligence-box">
-          <div class="intel-header">
-            <span>Gerenciar Grupos</span>
-          </div>
-          <div class="input-row" style="margin-bottom:8px;">
-            <input type="text" id="newGroupNameInput" placeholder="Nome do novo grupo...">
-            <button class="btn btn-primary btn-sm" onclick="createNewGroup()">+ Criar</button>
-          </div>
-          <div class="group-manage-list" id="groupManageList"></div>
-        </div>
-
-        <label class="field-label">Filtrar por Grupo:</label>
-        <div class="intel-actions" id="groupFilters"></div>
-
-        <div class="toggle-row">
-          <button class="active" id="tabSingle" onclick="setAddMode('single')">Adicionar um a um</button>
-          <button id="tabBulk" onclick="setAddMode('bulk')">Colar vários</button>
-        </div>
-
-        <label class="field-label">Salvar no Grupo:</label>
-        <select id="addGroupSelect"></select>
-
-        <div id="singleAdd" style="margin-top:8px;">
-          <label class="field-label">Endereço de e-mail do contato</label>
-          <div class="input-row">
-            <input type="email" id="singleEmailInput" placeholder="contato@empresa.com">
-            <button class="btn btn-primary" onclick="addSingleEmail()">+ Add</button>
-          </div>
-        </div>
-
-        <div id="bulkAdd" class="bulk-area" style="margin-top:8px;">
-          <label class="field-label">Cole vários e-mails (vírgula, ; ou linha)</label>
-          <textarea id="bulkEmailInput" placeholder="ana@empresa.com, joao@empresa.com"></textarea>
-          <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addBulkEmails()">+ Adicionar lista</button>
-        </div>
-
-        <div class="select-actions">
-          <button class="btn btn-ghost btn-sm" onclick="selectAll(true)">Selecionar filtro</button>
-          <button class="btn btn-ghost btn-sm" onclick="selectAll(false)">Limpar seleção</button>
-        </div>
-
-        <div class="chip-list" id="chipList">
-          <div class="empty-state">Nenhum e-mail cadastrado ainda.</div>
-        </div>
+    <!-- Gerenciador de Modelos -->
+    <div class="template-box">
+      <label class="field-label" style="color:var(--blue);">Gerenciar Modelos Salvos</label>
+      <div class="template-row">
+        <select id="savedTemplatesSelect" onchange="loadSelectedTemplate()"></select>
+        <button class="btn btn-ghost btn-sm" onclick="deleteCurrentTemplate()">Excluir</button>
       </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title">Mensagem & Envio</div>
-          <div class="panel-count" id="selectedBadge">0 selecionados</div>
-        </div>
-
-        <label class="field-label" style="color:var(--blue);">Carregar Template do Grupo:</label>
-        <select id="composerGroupSelect" onchange="loadGroupTemplate()"></select>
-
-        <label class="field-label" style="margin-top:8px;">Assunto</label>
-        <div class="input-row">
-          <input type="text" id="subjectInput" placeholder="Ex: Atualização importante" oninput="saveGroupTemplate()">
-        </div>
-
-        <label class="field-label">Corpo da mensagem</label>
-        <textarea id="bodyInput" style="min-height:140px" placeholder="Escreva sua mensagem..." oninput="saveGroupTemplate()"></textarea>
-
-        <div class="mass-send-box" id="massSendBox">
-          <label class="field-label" style="color:var(--red);">🔥 Envio em Massa (Fila Controlada - 1 Contato)</label>
-          <p style="font-size:11px; color:var(--gray); margin-bottom:6px;">Apenas 1 contato selecionado. Quantas vezes deseja enviar? (Máx. 10 seguro)</p>
-          <input type="number" id="massSendCount" value="1" min="1" max="10" style="width:90px;">
-        </div>
-
-        <label class="field-label" style="margin-top:14px;">Modo de Abertura</label>
-        <div class="send-modes">
-          <button class="send-mode active" id="modeDesktop" onclick="setSendMode('desktop')">
-            <b>Outlook Desktop / App</b>
-            <span>App padrão (mailto)</span>
-          </button>
-          <button class="send-mode" id="modeWeb" onclick="setSendMode('web')">
-            <b>Outlook na Web</b>
-            <span>outlook.office.com</span>
-          </button>
-        </div>
-
-        <div class="cta-row" style="margin-top:16px;">
-          <button class="btn btn-primary btn-block" onclick="prepareSend()">⚡ Iniciar Disparo Seguro</button>
-        </div>
+      <div class="template-row">
+        <input type="text" id="newTemplateName" placeholder="Nome do modelo (ex: auxiliar)">
+        <button class="btn btn-primary btn-sm" onclick="saveCurrentTemplate()">Salvar Modelo</button>
       </div>
     </div>
+
+    <!-- Seletor de Webmail no PC (Visível automaticamente no desktop) -->
+    <div id="pcWebmailSelectorBox" style="display:none;">
+      <label class="field-label">Provedor Web no PC:</label>
+      <div class="webmail-selector">
+        <button class="webmail-btn active" id="webOutlook" onclick="setWebmailProvider('outlook')">Outlook Web</button>
+        <button class="webmail-btn" id="webGmail" onclick="setWebmailProvider('gmail')">Gmail Web</button>
+      </div>
+    </div>
+
+    <!-- Campos do Outlook / E-mail -->
+    <div style="margin-bottom:10px;">
+      <label class="field-label">Para (To)</label>
+      <input type="text" id="toInput" placeholder="exemplo1@empresa.com, exemplo2@empresa.com">
+    </div>
+
+    <div style="margin-bottom:10px;">
+      <label class="field-label">CC (Com Cópia)</label>
+      <input type="text" id="ccInput" placeholder="copia@empresa.com">
+    </div>
+
+    <div style="margin-bottom:10px;">
+      <label class="field-label">CCO (Cópia Oculta)</label>
+      <input type="text" id="ccoInput" placeholder="oculto@empresa.com">
+    </div>
+
+    <div style="margin-bottom:10px;">
+      <label class="field-label">Assunto</label>
+      <input type="text" id="subjectInput" placeholder="Assunto do e-mail">
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label class="field-label">Mensagem</label>
+      <textarea id="bodyInput" placeholder="Escreva sua mensagem aqui..."></textarea>
+    </div>
+
+    <!-- Agendador -->
+    <div style="background:rgba(255,255,255,0.02); border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:16px;">
+      <label class="field-label" style="color:var(--ok);">Agendar Envio (Opcional)</label>
+      <div class="input-row" style="margin-bottom:0;">
+        <input type="datetime-local" id="scheduleTimeInput">
+        <button class="btn btn-ghost btn-sm" onclick="scheduleEmail()">Agendar</button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="triggerSend()">⚡ Enviar E-mail Agora</button>
   </div>
 
-  <div class="view-section" id="viewInteligencia">
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">Métricas & Histórico de Disparos</div>
-        <div class="panel-count" id="historyCountBadge">0 registros</div>
-      </div>
-      <p style="color:var(--gray); font-size:12px; margin-bottom:12px;">Visualize abaixo todos os e-mails disparados com confirmação, separados por grupo, endereço e data de envio.</p>
-      
-      <div class="history-table-wrapper">
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Data / Hora</th>
-              <th>E-mail Destinatário</th>
-              <th>Grupo</th>
-              <th>Assunto</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody">
-            <tr><td colspan="5" style="text-align:center; color:var(--gray);">Nenhum disparo registrado ainda.</td></tr>
-          </tbody>
-        </table>
-      </div>
+  <!-- INTELIGÊNCIA & HISTÓRICO (Junto na mesma aba, separado por subtitulo) -->
+  <div class="panel">
+    <div class="panel-subtitle">📊 Inteligência & Histórico de Disparos</div>
+    <p style="color:var(--gray); font-size:12px; margin-bottom:12px;">Registro de todos os e-mails disparados pela sua conta.</p>
+    
+    <div class="history-table-wrapper">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Data / Hora</th>
+            <th>Para</th>
+            <th>Assunto</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <tr><td colspan="4" style="text-align:center; color:var(--gray);">Nenhum disparo registrado ainda.</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </main>
 
 <footer>
-  <b>Flashemail v3.5</b> — CCO Separado Corretamente, Sessão Persistida e Confirmação de Envio.
+  <b>Flashemail v4.0</b> — Praticidade, Agendamento & Abrangência Automática.
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <script>
   let currentUser = null;
-  let currentAuthMode = 'login';
-  let pendingSendPayload = null; // Guarda dados para confirmar após o envio real
+  let templates = {};
+  let historyLog = [];
+  let schedules = [];
+  let pcWebmailProvider = 'outlook'; // 'outlook' ou 'gmail'
+  let activeScheduledPayload = null;
 
-  // Verifica login salvo ao carregar a página
+  // Gerenciamento de Login persistente
   window.addEventListener('DOMContentLoaded', () => {
     const savedUser = localStorage.getItem('flashemail_current_user');
     if(savedUser) {
       loginSuccess(savedUser, true);
     }
+    
+    // Verifica se é desktop para exibir opções de webmail
+    if(!isMobileDevice()) {
+      document.getElementById('pcWebmailSelectorBox').style.display = 'block';
+    }
+
+    // Solicita permissão para notificações do navegador
+    if("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    // Inicia verificador de agendamentos a cada 15 segundos
+    setInterval(checkSchedules, 15000);
   });
 
-  function setAuthMode(mode) {
-    currentAuthMode = mode;
-    document.getElementById('tabLoginMode').classList.toggle('active', mode === 'login');
-    document.getElementById('tabRegisterMode').classList.toggle('active', mode === 'register');
-    document.getElementById('authButtonAction').textContent = mode === 'login' ? 'Acessar Conta' : 'Cadastrar e Entrar';
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
-  function handleAuth() {
+  function handleLogin() {
     const emailInput = document.getElementById('authEmail').value.trim().toLowerCase();
     const passwordInput = document.getElementById('authPassword').value;
 
-    if(!emailInput || !isValidEmail(emailInput)){
+    if(!emailInput || !emailInput.includes('@')) {
       showToast('Insira um e-mail válido.');
       return;
     }
-    if(!passwordInput || passwordInput.length < 3){
-      showToast('A senha precisa ter pelo menos 3 caracteres.');
+    if(!passwordInput || passwordInput.length < 3) {
+      showToast('Insira uma senha válida.');
       return;
     }
 
-    let users = JSON.parse(localStorage.getItem('flashemail_db_users') || '{}');
-
-    if(currentAuthMode === 'login') {
-      if(!users[emailInput]) {
-        showToast('Não há cadastro para este e-mail. Cadastre-se primeiro.');
-        setAuthMode('register');
-        return;
-      }
-      if(users[emailInput] !== passwordInput) {
-        showToast('Senha incorreta.');
-        return;
-      }
-    } else {
-      if(users[emailInput]) {
-        showToast('Este e-mail já possui cadastro. Faça login.');
-        setAuthMode('login');
-        return;
-      }
+    let users = JSON.parse(localStorage.getItem('flashemail_v4_users') || '{}');
+    if(!users[emailInput]) {
       users[emailInput] = passwordInput;
-      localStorage.setItem('flashemail_db_users', JSON.stringify(users));
-      showToast('Cadastro realizado com sucesso!');
+      localStorage.setItem('flashemail_v4_users', JSON.stringify(users));
+    } else if(users[emailInput] !== passwordInput) {
+      showToast('Senha incorreta.');
+      return;
     }
 
     loginSuccess(emailInput, false);
@@ -503,12 +399,11 @@
     currentUser = email;
     localStorage.setItem('flashemail_current_user', email);
     document.getElementById('loginOverlay').classList.remove('show');
-    document.getElementById('userProfile').style.display = 'flex';
+    document.getElementById('userProfileWrapper').style.display = 'block';
     document.getElementById('userNameDisplay').textContent = email;
     document.getElementById('userAvatarDisplay').textContent = email.charAt(0).toUpperCase();
     
-    loadData();
-    restoreLastInfo();
+    loadUserData();
     if(!isRestoring) showToast(`Bem-vindo, ${email}!`);
   }
 
@@ -516,62 +411,41 @@
     currentUser = null;
     localStorage.removeItem('flashemail_current_user');
     document.getElementById('loginOverlay').classList.add('show');
-    document.getElementById('userProfile').style.display = 'none';
+    document.getElementById('userProfileWrapper').style.display = 'none';
     document.getElementById('authPassword').value = '';
-    contacts = [];
-    groups = [];
+    templates = {};
     historyLog = [];
+    schedules = [];
     renderAll();
   }
 
-  let contacts = [];
-  let groups = [];
-  let historyLog = [];
-  let currentGroupFilter = 'todos';
-  let addMode = 'single';
-  let sendMode = 'desktop';
-  let templates = {};
-  let lastInfo = { email: '', group: 'Sem Grupo' };
-
-  function loadData() {
-    if(!currentUser) return;
-    const keyPrefix = `flashemail_v35_${currentUser}`;
-    
-    const savedGroups = localStorage.getItem(`${keyPrefix}_groups`);
-    groups = savedGroups ? JSON.parse(savedGroups) : [];
-
-    const savedContacts = localStorage.getItem(`${keyPrefix}_contacts`);
-    contacts = savedContacts ? JSON.parse(savedContacts) : [];
-    
-    const savedTemplates = localStorage.getItem(`${keyPrefix}_templates`);
-    templates = savedTemplates ? JSON.parse(savedTemplates) : {};
-
-    const savedHistory = localStorage.getItem(`${keyPrefix}_history`);
-    historyLog = savedHistory ? JSON.parse(savedHistory) : [];
-
-    renderAll();
+  function toggleUserDropdown() {
+    const dd = document.getElementById('userDropdown');
+    dd.classList.toggle('show');
   }
 
-  function saveData() {
-    if(!currentUser) return;
-    const keyPrefix = `flashemail_v35_${currentUser}`;
-    localStorage.setItem(`${keyPrefix}_groups`, JSON.stringify(groups));
-    localStorage.setItem(`${keyPrefix}_contacts`, JSON.stringify(contacts));
-    localStorage.setItem(`${keyPrefix}_templates`, JSON.stringify(templates));
-    localStorage.setItem(`${keyPrefix}_history`, JSON.stringify(historyLog));
-    localStorage.setItem(`${keyPrefix}_lastInfo`, JSON.stringify(lastInfo));
-  }
-
-  function restoreLastInfo() {
-    if(!currentUser) return;
-    const savedLast = localStorage.getItem(`flashemail_v35_${currentUser}_lastInfo`);
-    if(savedLast) {
-      lastInfo = JSON.parse(savedLast);
-      document.getElementById('singleEmailInput').value = lastInfo.email || '';
-      document.getElementById('addGroupSelect').value = lastInfo.group || 'Sem Grupo';
-      document.getElementById('composerGroupSelect').value = lastInfo.group || 'Sem Grupo';
-      loadGroupTemplate();
+  // Fechar dropdown ao clicar fora
+  window.addEventListener('click', (e) => {
+    if(!document.getElementById('userProfileWrapper').contains(e.target)) {
+      document.getElementById('userDropdown').classList.remove('show');
     }
+  });
+
+  function loadUserData() {
+    if(!currentUser) return;
+    const key = `flashemail_v4_data_${currentUser}`;
+    const data = JSON.parse(localStorage.getItem(key) || '{}');
+    templates = data.templates || {};
+    historyLog = data.history || [];
+    schedules = data.schedules || [];
+    renderAll();
+  }
+
+  function saveUserData() {
+    if(!currentUser) return;
+    const key = `flashemail_v4_data_${currentUser}`;
+    const data = { templates, history: historyLog, schedules };
+    localStorage.setItem(key, JSON.stringify(data));
   }
 
   function showToast(msg){
@@ -581,394 +455,228 @@
     setTimeout(()=> t.classList.remove('show'), 2500);
   }
 
-  function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
-
-  function switchView(viewName) {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-    
-    if(viewName === 'campanha') {
-      document.querySelectorAll('.nav-tab')[0].classList.add('active');
-      document.getElementById('viewCampanha').classList.add('active');
-    } else {
-      document.querySelectorAll('.nav-tab')[1].classList.add('active');
-      document.getElementById('viewInteligencia').classList.add('active');
-      renderHistoryTable();
-    }
-  }
-
-  function createNewGroup() {
-    const input = document.getElementById('newGroupNameInput');
-    let groupName = input.value.trim();
-    
-    if(!groupName) {
-      showToast('Digite um nome para o grupo.');
-      return;
-    }
-    if(groupName.toLowerCase() === 'sem grupo') {
-      showToast('Nome reservado.');
-      return;
-    }
-    if(groups.map(g=>g.toLowerCase()).includes(groupName.toLowerCase())) {
-      showToast('Este grupo já existe.');
-      return;
-    }
-
-    groups.push(groupName);
-    if(!templates[groupName]) {
-      templates[groupName] = { subject: '', body: '' };
-    }
-
-    input.value = '';
-    saveData();
-    renderAll();
-    showToast(`Grupo "${groupName}" criado com sucesso!`);
-  }
-
-  function deleteGroup(groupName) {
-    if(!confirm(`Deseja realmente apagar o grupo "${groupName}"? Os contatos vinculados passarão para "Sem Grupo".`)) return;
-
-    groups = groups.filter(g => g !== groupName);
-    delete templates[groupName];
-
-    contacts.forEach(c => {
-      if(c.group === groupName) c.group = 'Sem Grupo';
-    });
-
-    if(currentGroupFilter === groupName) currentGroupFilter = 'todos';
-
-    saveData();
-    renderAll();
-    showToast(`Grupo "${groupName}" removido.`);
-  }
-
   function renderAll() {
-    renderGroupManagementList();
-    renderGroupFilters();
-    renderGroupSelects();
-    renderContacts();
-    loadGroupTemplate();
+    renderTemplatesSelect();
+    renderHistoryTable();
   }
 
-  function renderGroupManagementList() {
-    const container = document.getElementById('groupManageList');
-    if(groups.length === 0) {
-      container.innerHTML = '<div style="font-size:10px; color:var(--gray); text-align:center; padding:4px;">Nenhum grupo customizado criado.</div>';
+  // --- MODELOS ---
+  function renderTemplatesSelect() {
+    const sel = document.getElementById('savedTemplatesSelect');
+    const keys = Object.keys(templates);
+    if(keys.length === 0) {
+      sel.innerHTML = '<option value="">Nenhum modelo salvo</option>';
       return;
     }
-    container.innerHTML = groups.map(g => `
-      <div class="group-manage-item">
-        <span>📂 ${g}</span>
-        <button class="chip-remove" onclick="deleteGroup('${g}')" title="Apagar grupo">✕</button>
-      </div>
-    `).join('');
-  }
-
-  function renderGroupFilters() {
-    const container = document.getElementById('groupFilters');
-    let html = `<button class="btn-intel ${currentGroupFilter === 'todos' ? 'active':''}" onclick="filterByGroup('todos')">Todos</button>`;
-    html += `<button class="btn-intel ${currentGroupFilter === 'Sem Grupo' ? 'active':''}" onclick="filterByGroup('Sem Grupo')">Sem Grupo</button>`;
-    
-    groups.forEach(g => {
-      html += `<button class="btn-intel ${currentGroupFilter === g ? 'active':''}" onclick="filterByGroup('${g}')">${g}</button>`;
+    let html = '<option value="">Selecione um modelo salvo...</option>';
+    keys.forEach(k => {
+      html += `<option value="${k}">${k}</option>`;
     });
-    container.innerHTML = html;
+    sel.innerHTML = html;
   }
 
-  function renderGroupSelects() {
-    const addSelect = document.getElementById('addGroupSelect');
-    const composerSelect = document.getElementById('composerGroupSelect');
-    
-    let html = '<option value="Sem Grupo">Sem Grupo</option>';
-    groups.forEach(g => {
-      html += `<option value="${g}">${g}</option>`;
-    });
-    
-    const currentAddVal = addSelect.value || 'Sem Grupo';
-    const currentCompVal = composerSelect.value || 'Sem Grupo';
-
-    addSelect.innerHTML = html;
-    composerSelect.innerHTML = html;
-
-    addSelect.value = currentAddVal;
-    composerSelect.value = currentCompVal;
-  }
-
-  function setAddMode(mode){
-    addMode = mode;
-    document.getElementById('tabSingle').classList.toggle('active', mode==='single');
-    document.getElementById('tabBulk').classList.toggle('active', mode==='bulk');
-    document.getElementById('singleAdd').style.display = mode==='single' ? 'block':'none';
-    document.getElementById('bulkAdd').classList.toggle('show', mode==='bulk');
-  }
-
-  function filterByGroup(group) {
-    currentGroupFilter = group;
-    renderGroupFilters();
-    if (group !== 'todos') {
-      document.getElementById('composerGroupSelect').value = group;
-      loadGroupTemplate();
-    }
-    renderContacts();
-  }
-
-  function loadGroupTemplate() {
-    const group = document.getElementById('composerGroupSelect').value || 'Sem Grupo';
-    if(!templates[group]) {
-      document.getElementById('subjectInput').value = '';
-      document.getElementById('bodyInput').value = '';
+  function saveCurrentTemplate() {
+    const name = document.getElementById('newTemplateName').value.trim();
+    if(!name) {
+      showToast('Digite um nome para o modelo.');
       return;
     }
-    document.getElementById('subjectInput').value = templates[group].subject || '';
-    document.getElementById('bodyInput').value = templates[group].body || '';
-  }
-
-  function saveGroupTemplate() {
-    const group = document.getElementById('composerGroupSelect').value || 'Sem Grupo';
-    if(!templates[group]) templates[group] = { subject: '', body: '' };
-    
-    templates[group] = {
+    templates[name] = {
+      to: document.getElementById('toInput').value,
+      cc: document.getElementById('ccInput').value,
+      cco: document.getElementById('ccoInput').value,
       subject: document.getElementById('subjectInput').value,
       body: document.getElementById('bodyInput').value
     };
-    saveData();
+    saveUserData();
+    renderTemplatesSelect();
+    document.getElementById('newTemplateName').value = '';
+    document.getElementById('savedTemplatesSelect').value = name;
+    showToast(`Modelo "${name}" salvo com sucesso!`);
   }
 
-  function addSingleEmail(){
-    const input = document.getElementById('singleEmailInput');
-    const group = document.getElementById('addGroupSelect').value || 'Sem Grupo';
-    const val = input.value.trim();
-    if(!val) return;
-    if(!isValidEmail(val)){ showToast('E-mail inválido'); return; }
-    
-    if (addEmailToList(val, group)) {
-      lastInfo.email = val;
-      lastInfo.group = group;
-      saveData();
-    }
-    input.value = '';
-    input.focus();
+  function loadSelectedTemplate() {
+    const name = document.getElementById('savedTemplatesSelect').value;
+    if(!name || !templates[name]) return;
+    const t = templates[name];
+    document.getElementById('toInput').value = t.to || '';
+    document.getElementById('ccInput').value = t.cc || '';
+    document.getElementById('ccoInput').value = t.cco || '';
+    document.getElementById('subjectInput').value = t.subject || '';
+    document.getElementById('bodyInput').value = t.body || '';
+    showToast(`Modelo "${name}" carregado!`);
   }
 
-  document.getElementById('singleEmailInput').addEventListener('keydown', e=>{
-    if(e.key === 'Enter'){ e.preventDefault(); addSingleEmail(); }
-  });
-
-  function addBulkEmails(){
-    const raw = document.getElementById('bulkEmailInput').value;
-    const group = document.getElementById('addGroupSelect').value || 'Sem Grupo';
-    const parts = raw.split(/[,;\n]/).map(s=>s.trim()).filter(Boolean);
-    let added = 0;
-    
-    parts.forEach(p => {
-      if(isValidEmail(p)){ if(addEmailToList(p, group, false)) added++; }
-    });
-    
-    if(added) {
-      lastInfo.group = group;
-      saveData();
-      renderContacts();
-      document.getElementById('bulkEmailInput').value = '';
-      showToast(`${added} e-mail(s) adicionados!`);
-    } else {
-      showToast('Nenhum e-mail válido encontrado.');
-    }
-  }
-
-  function addEmailToList(email, group, triggerRender = true){
-    email = email.toLowerCase();
-    const existing = contacts.find(c => c.email === email);
-    if(existing){
-      existing.group = group;
-      if(triggerRender) { showToast('E-mail já existia. Grupo atualizado.'); renderContacts(); saveData(); }
-      return false;
-    }
-    contacts.unshift({ email, group, selected: true, sendCount: 0 });
-    if(triggerRender) { saveData(); renderContacts(); }
-    return true;
-  }
-
-  function toggleContact(email){
-    const c = contacts.find(c=>c.email===email);
-    if(c) c.selected = !c.selected;
-    renderContacts();
-  }
-
-  function selectAll(state){
-    contacts.forEach(c => {
-      if(currentGroupFilter === 'todos' || c.group === currentGroupFilter) {
-        c.selected = state;
-      }
-    });
-    renderContacts();
-  }
-
-  function removeContact(email){
-    contacts = contacts.filter(c=>c.email !== email);
-    saveData();
-    renderContacts();
-  }
-
-  function renderContacts(){
-    const list = document.getElementById('chipList');
-    const filtered = currentGroupFilter === 'todos' 
-      ? contacts 
-      : contacts.filter(c => c.group === currentGroupFilter);
-
-    document.getElementById('countBadge').textContent = contacts.length + ' total';
-    const selectedCount = contacts.filter(c=>c.selected).length;
-    document.getElementById('selectedBadge').textContent = selectedCount + ' selecionados';
-
-    document.getElementById('massSendBox').classList.toggle('show', selectedCount === 1);
-
-    if(filtered.length === 0){
-      list.innerHTML = '<div class="empty-state">Nenhum e-mail para este filtro.</div>';
+  function deleteCurrentTemplate() {
+    const name = document.getElementById('savedTemplatesSelect').value;
+    if(!name || !templates[name]) {
+      showToast('Selecione um modelo para excluir.');
       return;
     }
-    
-    list.innerHTML = filtered.map(c => `
-      <div class="chip ${c.selected ? 'selected':''}">
-        <input type="checkbox" ${c.selected?'checked':''} onchange="toggleContact('${c.email}')">
-        <div class="chip-content">
-          <div class="chip-email">${c.email}</div>
-          <div class="chip-meta">
-            <span class="badge-group">${c.group}</span>
-            <span class="${c.sendCount > 0 ? 'badge-sent' : ''}">${c.sendCount} envio(s)</span>
-          </div>
-        </div>
-        <button class="chip-remove" onclick="removeContact('${c.email}')">✕</button>
-      </div>
-    `).join('');
+    if(confirm(`Deseja excluir o modelo "${name}"?`)) {
+      delete templates[name];
+      saveUserData();
+      renderTemplatesSelect();
+      showToast('Modelo excluído.');
+    }
   }
 
-  function setSendMode(mode){
-    sendMode = mode;
-    document.getElementById('modeDesktop').classList.toggle('active', mode==='desktop');
-    document.getElementById('modeWeb').classList.toggle('active', mode==='web');
+  // --- WEBMAIL PC SELECTOR ---
+  function setWebmailProvider(provider) {
+    pcWebmailProvider = provider;
+    document.getElementById('webOutlook').classList.toggle('active', provider === 'outlook');
+    document.getElementById('webGmail').classList.toggle('active', provider === 'gmail');
   }
 
-  /* ====== GERAÇÃO E CONFIRMAÇÃO DE ENVIO ====== */
-  function prepareSend(){
-    const selected = contacts.filter(c => c.selected);
-    if(selected.length === 0){ 
-      showToast('Selecione ao menos um destinatário'); 
-      return; 
-    }
-    
-    const subject = document.getElementById('subjectInput').value.trim();
-    const body = document.getElementById('bodyInput').value;
-    const composerGroup = document.getElementById('composerGroupSelect').value || 'Sem Grupo';
-    
-    if(!subject) { 
-      showToast('Adicione um assunto no template!'); 
-      return; 
-    }
+  // --- FORMATAR EMAILS CORRETAMENTE ---
+  function formatEmailList(str) {
+    if(!str) return '';
+    return str.split(/[,;\n]/).map(s => encodeURIComponent(s.trim())).filter(Boolean).join(',');
+  }
 
-    // Prepara o payload para ser executado e confirmado
-    pendingSendPayload = {
-      selected,
-      subject,
-      body,
-      composerGroup
+  // --- ENVIO AUTOMÁTICO ---
+  function getPayload() {
+    return {
+      to: document.getElementById('toInput').value.trim(),
+      cc: document.getElementById('ccInput').value.trim(),
+      cco: document.getElementById('ccoInput').value.trim(),
+      subject: document.getElementById('subjectInput').value.trim(),
+      body: document.getElementById('bodyInput').value
     };
+  }
 
-    // 1. CASO DE 1 CONTATO SELECIONADO E LOTE > 1 (Fila Controlada)
-    if(selected.length === 1) {
-      let times = parseInt(document.getElementById('massSendCount').value) || 1;
-      if (times > 10) times = 10;
-      
-      if(times > 1) {
-        showToast(`Iniciando fila controlada (${times} disparos)...`);
-        let delay = 0;
-        for(let i = 0; i < times; i++) {
-          setTimeout(() => {
-            const url = sendMode === 'desktop'
-              ? `mailto:${encodeURIComponent(selected[0].email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-              : `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(selected[0].email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.open(url, '_blank');
-          }, delay);
-          delay += 1500;
-        }
-        // Exibe modal de confirmação para validar se o disparo ocorreu
-        document.getElementById('sendConfirmModal').classList.add('show');
-        return;
-      }
-    }
-
-    // 2. CASO DE 1 CONTATO SIMPLES (Lote 1)
-    if(selected.length === 1) {
-      const url = sendMode === 'desktop'
-        ? `mailto:${encodeURIComponent(selected[0].email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-        : `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(selected[0].email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      
-      window.open(url, '_blank');
-      document.getElementById('sendConfirmModal').classList.add('show');
+  function triggerSend() {
+    const payload = getPayload();
+    if(!payload.to && !payload.cc && !payload.cco) {
+      showToast('Insira pelo menos um destinatário (Para, CC ou CCO).');
       return;
     }
+    executeSend(payload);
+  }
 
-    // 3. CASO DE MÚLTIPLOS CONTATOS -> CORREÇÃO DO CCO (BCC)
-    // Cada e-mail é codificado separadamente e unido por ponto e vírgula sem codificar o separador
-    const encodedEmailsList = selected.map(c => encodeURIComponent(c.email)).join(';');
+  function executeSend(p) {
+    const encTo = formatEmailList(p.to);
+    const encCc = formatEmailList(p.cc);
+    const encCco = formatEmailList(p.cco);
+    const encSub = encodeURIComponent(p.subject);
+    const encBody = encodeURIComponent(p.body);
 
-    const url = sendMode === 'desktop'
-      ? `mailto:?bcc=${encodedEmailsList}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-      : `https://outlook.office.com/mail/deeplink/compose?bcc=${encodedEmailsList}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    let url = '';
+
+    if(isMobileDevice()) {
+      // Celular: abre app nativo (mailto)
+      url = `mailto:${encTo}?cc=${encCc}&bcc=${encCco}&subject=${encSub}&body=${encBody}`;
+    } else {
+      // PC: Webmail automático (Outlook Web ou Gmail Web)
+      if(pcWebmailProvider === 'outlook') {
+        url = `https://outlook.office.com/mail/deeplink/compose?to=${encTo}&cc=${encCc}&bcc=${encCco}&subject=${encSub}&body=${encBody}`;
+      } else {
+        url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encTo}&cc=${encCc}&bcc=${encCco}&su=${encSub}&body=${encBody}`;
+      }
+    }
 
     window.open(url, '_blank');
-    document.getElementById('sendConfirmModal').classList.add('show');
+    registerHistory(p);
   }
 
-  function cancelConfirmSend() {
-    pendingSendPayload = null;
-    document.getElementById('sendConfirmModal').classList.remove('show');
-    showToast('Disparo cancelado. Nenhum histórico foi computado.');
-  }
-
-  function confirmSendAction() {
-    if(!pendingSendPayload) {
-      document.getElementById('sendConfirmModal').classList.remove('show');
-      return;
-    }
-
-    const { selected, subject, body, composerGroup } = pendingSendPayload;
-    const nowTimestamp = new Date().toLocaleString('pt-BR');
-
-    selected.forEach(c => {
-      c.sendCount += 1;
-      historyLog.unshift({
-        date: nowTimestamp,
-        email: c.email,
-        group: c.group || composerGroup,
-        subject: subject
-      });
-      c.selected = false;
+  function registerHistory(p) {
+    const now = new Date().toLocaleString('pt-BR');
+    historyLog.unshift({
+      date: now,
+      to: p.to || 'Sem destinatário direto',
+      subject: p.subject || 'Sem assunto'
     });
-
-    saveData();
-    renderContacts();
-    pendingSendPayload = null;
-    document.getElementById('sendConfirmModal').classList.remove('show');
-    showToast('Disparo confirmado e registrado com sucesso!');
+    saveUserData();
+    renderHistoryTable();
+    showToast('Abertura de envio acionada!');
   }
 
   function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
-    document.getElementById('historyCountBadge').textContent = historyLog.length + ' registros';
-
     if(historyLog.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--gray);">Nenhum disparo registrado ainda.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--gray);">Nenhum disparo registrado ainda.</td></tr>';
       return;
     }
-
     tbody.innerHTML = historyLog.map(h => `
       <tr>
         <td>${h.date}</td>
-        <td>${h.email}</td>
-        <td><span class="badge-group">${h.group}</span></td>
-        <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${h.subject}</td>
-        <td><span class="badge-sent">Confirmado</span></td>
+        <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${h.to}</td>
+        <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${h.subject}</td>
+        <td><span style="color:var(--ok);">Disparado</span></td>
       </tr>
-    `).join(',');
+    `).join('');
+  }
+
+  // --- AGENDADOR ---
+  function scheduleEmail() {
+    const timeVal = document.getElementById('scheduleTimeInput').value;
+    if(!timeVal) {
+      showToast('Selecione data e hora para o agendamento.');
+      return;
+    }
+    const payload = getPayload();
+    if(!payload.to && !payload.cc && !payload.cco) {
+      showToast('Preencha os destinatários antes de agendar.');
+      return;
+    }
+
+    const scheduledDate = new Date(timeVal).getTime();
+    if(scheduledDate <= Date.now()) {
+      showToast('O horário agendado precisa ser futuro.');
+      return;
+    }
+
+    schedules.push({
+      time: scheduledDate,
+      timeStr: new Date(timeVal).toLocaleString('pt-BR'),
+      payload
+    });
+    saveUserData();
+    showToast('E-mail agendado com sucesso!');
+    document.getElementById('scheduleTimeInput').value = '';
+  }
+
+  function checkSchedules() {
+    if(schedules.length === 0) return;
+    const now = Date.now();
+    let remaining = [];
+
+    schedules.forEach(item => {
+      if(now >= item.time) {
+        // Disparar notificação e modal
+        activeScheduledPayload = item.payload;
+        showSchedulerModal(item.timeStr);
+        if("Notification" in window && Notification.permission === "granted") {
+          new Notification("Flashemail - Hora do Disparo!", {
+            body: `Envio agendado para ${item.payload.to || 'destinatários'} (${item.payload.subject})`
+          });
+        }
+      } else {
+        remaining.push(item);
+      }
+    });
+
+    if(remaining.length !== schedules.length) {
+      schedules = remaining;
+      saveUserData();
+    }
+  }
+
+  function showSchedulerModal(timeStr) {
+    document.getElementById('schedulerModalText').textContent = `O horário agendado (${timeStr}) chegou. Deseja efetuar o envio agora?`;
+    document.getElementById('schedulerModal').classList.add('show');
+  }
+
+  function closeSchedulerModal() {
+    document.getElementById('schedulerModal').classList.remove('show');
+    activeScheduledPayload = null;
+  }
+
+  function executeScheduledSend() {
+    if(activeScheduledPayload) {
+      executeSend(activeScheduledPayload);
+    }
+    closeSchedulerModal();
   }
 </script>
 
